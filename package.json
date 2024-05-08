@@ -1,0 +1,46 @@
+{
+  "name": "posx",
+  "version": "1.0.0",
+  "description": "",
+  "main": "apps/backend/dist/electron/main.js",
+  "build": {
+    "extends": null,
+    "files": [
+      "apps/backend/dist/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    }
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "start": "electron-forge start",
+    "package": "rimraf out && electron-forge package",
+    "make": "electron-forge make"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "workspaces": [
+    "apps/*"
+  ],
+  "devDependencies": {
+    "@electron-forge/cli": "^7.4.0",
+    "@electron-forge/maker-deb": "^7.4.0",
+    "@electron-forge/maker-rpm": "^7.4.0",
+    "@electron-forge/maker-squirrel": "^7.4.0",
+    "@electron-forge/maker-zip": "^7.4.0",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.4.0",
+    "@electron-forge/plugin-fuses": "^7.4.0",
+    "@electron/fuses": "^1.8.0",
+    "electron": "30.0.2",
+    "rimraf": "^5.0.5",
+    "turbo": "^1.10.16"
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0",
+    "is-online": "^10.0.0"
+  }
+}
