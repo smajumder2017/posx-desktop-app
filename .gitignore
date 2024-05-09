@@ -4,6 +4,7 @@
 /build
 /out
 /apps/backend/prisma/posx.db*
+.turbo
 
 # Logs
 logs

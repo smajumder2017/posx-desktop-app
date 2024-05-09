@@ -1,7 +1,7 @@
 {
   "name": "posx",
   "version": "1.0.0",
-  "description": "",
+  "description": "A fast point of sale application",
   "main": "apps/backend/dist/electron/main.js",
   "build": {
     "extends": null,
@@ -16,12 +16,14 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "turbo run dev",
     "build": "turbo run build",
+    "migrate": "npm run --workspace backend migrate",
     "start": "electron-forge start",
-    "package": "rimraf out && electron-forge package",
+    "clean": "rimraf out && rimraf node_modules/backend && rimraf node_modules/backend",
+    "package": "npm run clean && electron-forge package",
     "make": "electron-forge make"
   },
   "keywords": [],
-  "author": "",
+  "author": "PosX",
   "license": "ISC",
   "workspaces": [
     "apps/*"
@@ -35,6 +37,7 @@
     "@electron-forge/plugin-auto-unpack-natives": "^7.4.0",
     "@electron-forge/plugin-fuses": "^7.4.0",
     "@electron/fuses": "^1.8.0",
+    "asar": "^3.2.0",
     "electron": "30.0.2",
     "rimraf": "^5.0.5",
     "turbo": "^1.10.16"

@@ -12,7 +12,7 @@ if (isDev) {
   try {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('electron-reloader')(module);
-  } catch (_) {}
+  } catch (_) { }
 }
 
 const createWindow = async () => {
@@ -23,14 +23,27 @@ const createWindow = async () => {
       width: 800,
       height: 600,
     });
+    log.info(`Mode:  ${isDev ? 'dev' : 'prod'}`)
     if (!isDev) {
-      exec('npx prisma migrate deploy');
+      const exc = exec('npm run migrate', (error, stdout, stderror)=>{
+        stderror && log.info(stderror);
+        stdout && log.info(stdout);
+      });
+      exc.on('error', (error) => {
+        log.info(error);
+      })
+      exc.on('exit', async (msg) => {
+        log.info(msg);
+        log.info('Migration completed');
+        await bootstrap();
+        win.loadFile('./electron/index.html');
+        shell.openExternal(`http://localhost:${isDev ? 5173 : 8080}`);
+        log.info(app.getAppPath());
+      })
+      
+  
+      
     }
-
-    await bootstrap();
-    win.loadFile('./electron/index.html');
-    shell.openExternal(`http://localhost:${isDev ? 5173 : 8080}`);
-    log.info(app.getAppPath());
   } catch (error) {
     log.error(error);
   }

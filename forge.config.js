@@ -3,22 +3,46 @@ const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
-const { exec } = require('child_process');
-
+const { execSync } = require('child_process');
+let { noAsar } = require('process');
+noAsar =true;
 function getEnvFile() {
   const platform = os.platform();
   return `apps/backend/env/.env.${platform}`;
 }
 
+function getOutputPath() {
+  const platform = os.platform();
+  switch (platform) {
+    case "darwin": {
+      return path.join(
+        __dirname,
+        `out/posx-${process.platform}-${process.arch}/posx.app/Contents/Resources/app`,
+      );
+    } 
+    case "win32": {
+      return path.join(
+        __dirname,
+        `out/posx-${process.platform}-${process.arch}/resources/app`,
+      );
+    }
+  
+    default:
+      break;
+  }
+}
+
 module.exports = {
   // packagerConfig: {
-  //   asar: true,
+  //   asar: true
   // },
   rebuildConfig: {},
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
-      config: {},
+      config: {
+        // asar: false
+      },
     },
     {
       name: '@electron-forge/maker-zip',
@@ -56,6 +80,8 @@ module.exports = {
       /^\/(src|test|out)/,
       /^\/apps\/backend\/(src|test|out)/,
       /^\/apps\/frontend\/(src|test|out)/,
+      /^\/node_modules\/backend($|\/)/,
+      /^\/node_modules\/frontend($|\/)/,
       /^\/node_modules\/electron($|\/)/,
       /^\/node_modules\/\.bin($|\/)/,
       /^\/node_modules\/\.cache($|\/)/,
@@ -88,15 +114,13 @@ module.exports = {
     },
     postPackage: async (forgeConfig, options) => {
       const srcNodeModules = path.join(__dirname, 'node_modules');
-      const output = path.join(
-        __dirname,
-        `out/posx-${process.platform}-${process.arch}/posx.app/Contents/Resources/app`,
-      );
+      const output = getOutputPath();
       const destNodeModules = path.join(output, 'node_modules');
+      
       fs.cpSync(srcNodeModules, destNodeModules, { recursive: true });
       const envPath = path.join(__dirname, getEnvFile());
       fs.copyFileSync(envPath, output + '/apps/backend/.env');
-      exec(`npm --prefix ${output} prune --production`);
+      execSync(`npm --prefix ${output} prune --production`);
     },
   },
 };
