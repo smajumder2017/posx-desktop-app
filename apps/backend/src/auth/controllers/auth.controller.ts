@@ -10,7 +10,7 @@ import {
 import { AuthService } from '../services/auth.service';
 import { UserService } from '../../user/services/user.service';
 import { LoginDto, LoginResponseDto } from '../dto/auth.dto';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 @Controller('auth')
 export class AuthController {
