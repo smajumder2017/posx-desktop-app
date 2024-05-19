@@ -37,6 +37,7 @@ import { ICreateBillRequest } from '@/models/billing';
 import * as apis from '@/apis';
 import { IUserInfoResponse } from '@/models/auth';
 import { IShopResponse } from '@/models/shop';
+import { posXDB } from '@/db/db';
 
 interface IBillingFormProps {
   open: boolean;
@@ -88,28 +89,32 @@ const BillingForm: React.FC<IBillingFormProps> = ({
           billId: billResponse.data.id,
           paymentMode,
         });
-        await apis.printBill({
-          interface: 'tcp://192.168.1.23',
-          amount: billResponse.data.amount,
-          customerName: customer.name,
-          employeeName: employee.firstName + ' ' + employee.lastName,
-          orderId: orderDetails.id,
-          orderNumber: orderDetails.orderNumber,
-          grandTotal: billResponse.data.totalAmount,
-          roundOff: billResponse.data.roundoffDiff,
-          shopAddress: shopDetails.address,
-          shopContact: shopDetails.contactNo,
-          orderItems: orderDetails.items || [],
-          shopName: shopDetails.shopName,
-          totalQty:
-            orderDetails.items?.reduce((acc, curr) => acc + curr.quantity, 0) ||
-            0,
-          gst: {
-            gstNumber: shopDetails.registrationNo,
-            amount: gst,
-            percentage: '5',
-          },
-        });
+        const billingPrinter = await posXDB.printers.where('printerLocation').equals('billing').toArray();
+        if(billingPrinter.length) {
+          await apis.printBill({
+            interface: billingPrinter[0].printerValue,
+            amount: billResponse.data.amount,
+            customerName: customer.name,
+            employeeName: employee.firstName + ' ' + employee.lastName,
+            orderId: orderDetails.id,
+            orderNumber: orderDetails.orderNumber,
+            grandTotal: billResponse.data.totalAmount,
+            roundOff: billResponse.data.roundoffDiff,
+            shopAddress: shopDetails.address,
+            shopContact: shopDetails.contactNo,
+            orderItems: orderDetails.items || [],
+            shopName: shopDetails.shopName,
+            totalQty:
+              orderDetails.items?.reduce((acc, curr) => acc + curr.quantity, 0) ||
+              0,
+            gst: {
+              gstNumber: shopDetails.registrationNo,
+              amount: gst,
+              percentage: '5',
+            },
+          });
+        }
+        
       }
     } catch (error) {
       console.log(error);

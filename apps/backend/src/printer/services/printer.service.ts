@@ -6,25 +6,19 @@ import {
   BreakLine,
 } from 'node-thermal-printer';
 import { IPrintBillPayload } from '../dto/printer.dto';
-import * as ptp from 'pdf-to-printer';
-import * as upt from 'unix-print';
-// import { getPrinters } from '@lotekid/node-printer';
+import { getPrinters } from '@thiagoelg/node-printer';
+
 @Injectable()
 export class PrinterService {
   private printer: ThermalPrinter;
   constructor() {}
 
   async getConnectedPrinters() {
-    if (process.platform === 'win32') {
-      return ptp.getPrinters();
-    }
-    return upt.getPrinters();
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-
-    // return getPrinters();
+    return getPrinters();
   }
 
   setPrinter(connection: string) {
+    console.log(connection.includes('printer:'))
     this.printer = new ThermalPrinter({
       type: PrinterTypes.EPSON, // Printer type: 'star' or 'epson'
       // interface: 'tcp://192.168.1.23', // Printer interface
@@ -37,6 +31,7 @@ export class PrinterService {
         // Additional options
         timeout: 5000, // Connection timeout (ms) [applicable only for network printers] - default: 3000
       },
+      driver: connection.includes('printer:') ? require('@thiagoelg/node-printer') : undefined
     });
   }
   async getPrinterStatus() {

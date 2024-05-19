@@ -30,6 +30,7 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import BillingForm from '../components/billing-form';
+import { posXDB } from '@/db/db';
 
 export default function CreateOrder() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -83,9 +84,10 @@ export default function CreateOrder() {
   }) => {
     console.log(shopState.data);
     try {
-      if (shopState.data && orderDetails) {
+      const kitchenPrinter = await posXDB.printers.where('printerLocation').equals("kitchen").toArray();
+      if (shopState.data && orderDetails && kitchenPrinter.length) {
         const payload: IPrintTicketRequest = {
-          interface: 'tcp://192.168.1.23',
+          interface: kitchenPrinter[0].printerValue,
           shopName: shopState.data.shopName,
           orderNumber: orderDetails.orderNumber,
           orderItems:

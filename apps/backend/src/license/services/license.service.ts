@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../infra/database/services/prisma.service';
-import * as moment from 'moment';
+import moment from 'moment';
 import { AxiosResponse } from 'axios';
 import { License } from '@prisma/client';
 import { ApiService } from 'src/api/services/api.service';

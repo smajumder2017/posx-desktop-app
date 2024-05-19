@@ -10,7 +10,7 @@ import {
   IOrderUpdateRequest,
 } from '@/models/order';
 import { IShopResponse } from '@/models/shop';
-import { IPrintBillPayload, IPrintTicketRequest } from '@/models/printer';
+import { IPrintBillPayload, IPrintTicketRequest, IPrinter } from '@/models/printer';
 
 import axios from 'axios';
 import {
@@ -113,10 +113,10 @@ export const updateOrderItem = (apiArgs: IOrderItemUpdateRequest) =>
   axios.put(`${serverUrl}/order/item`, apiArgs);
 
 export const printTicket = (apiArgs: IPrintTicketRequest) =>
-  axios.post(`${serverUrl}/printer/print/ticket`, apiArgs);
+  axios.post(`http://localhost:8080/api/printer/print/ticket`, apiArgs);
 
 export const printBill = (apiArgs: IPrintBillPayload) =>
-  axios.post(`${serverUrl}/printer/print/bill`, apiArgs);
+  axios.post(`http://localhost:8080/api/printer/print/bill`, apiArgs);
 
 export const createBill = (apiArgs: ICreateBillRequest) =>
   axios.post<IBillResponse>(`${serverUrl}/billing`, apiArgs);
@@ -126,3 +126,5 @@ export const getActiveBill = (orderId: string) =>
 
 export const capturePayment = (apiArgs: ICreatePaymentRequest) =>
   axios.post<ICreatePaymentResponse>(`${serverUrl}/payment`, apiArgs);
+
+export const getPrinters = () => axios.get<IPrinter[]>(`http://localhost:8080/api/printer`);

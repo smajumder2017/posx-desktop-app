@@ -41,3 +41,19 @@ export interface IPrintBillPayload {
   amount: number;
   roundOff: number;
 }
+
+export interface IPrinter {
+  name: string;
+  portName: string;
+  driverName: string;
+  printProcessor: string;
+  datatype: string;
+  status?: (null)[] | null;
+  statusNumber: number;
+  attributes?: (string)[] | null;
+  priority: number;
+  defaultPriority: number;
+  averagePPM: number;
+  shareName?: string | null;
+}
+
