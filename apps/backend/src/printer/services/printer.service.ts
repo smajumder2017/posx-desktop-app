@@ -6,16 +6,22 @@ import {
   BreakLine,
 } from 'node-thermal-printer';
 import { IPrintBillPayload } from '../dto/printer.dto';
-import { getPrinters } from '@lotekid/node-printer';
+import * as ptp from 'pdf-to-printer';
+import * as upt from 'unix-print';
+// import { getPrinters } from '@lotekid/node-printer';
 @Injectable()
 export class PrinterService {
   private printer: ThermalPrinter;
   constructor() {}
 
   async getConnectedPrinters() {
+    if (process.platform === 'win32') {
+      return ptp.getPrinters();
+    }
+    return upt.getPrinters();
     // eslint-disable-next-line @typescript-eslint/no-var-requires
 
-    return getPrinters();
+    // return getPrinters();
   }
 
   setPrinter(connection: string) {
