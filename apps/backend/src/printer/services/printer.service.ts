@@ -6,11 +6,17 @@ import {
   BreakLine,
 } from 'node-thermal-printer';
 import { IPrintBillPayload } from '../dto/printer.dto';
-
+import { getPrinters } from '@lotekid/node-printer';
 @Injectable()
 export class PrinterService {
   private printer: ThermalPrinter;
   constructor() {}
+
+  async getConnectedPrinters() {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+
+    return getPrinters();
+  }
 
   setPrinter(connection: string) {
     this.printer = new ThermalPrinter({
