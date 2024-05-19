@@ -1,6 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import {
+  Customer,
   License,
   MenuCategory,
   MenuItems,
@@ -10,6 +11,7 @@ import {
   User,
   UserRoles,
   UserShop,
+  Prisma,
 } from '@prisma/client';
 import { AxiosResponse } from 'axios';
 import { lastValueFrom } from 'rxjs';
@@ -24,7 +26,7 @@ export class ApiService {
   }
 
   async getShopToken(userId: string, license: string) {
-    return lastValueFrom(
+    const tokenResponse = await lastValueFrom(
       this.httpService.post<{ accessToken: string }>(
         `shop/token`,
         { userId, license },
@@ -35,6 +37,8 @@ export class ApiService {
         },
       ),
     );
+    this.setToken(tokenResponse.data.accessToken);
+    return tokenResponse;
   }
 
   async validateLicense(
@@ -230,6 +234,46 @@ export class ApiService {
           },
         },
       ),
+    );
+  }
+
+  async getCustomerByNumber(number: string) {
+    return lastValueFrom(
+      this.httpService.get<Customer>(`customer`, {
+        headers: {
+          Authorization: `bearer ${this.token}`,
+        },
+        params: {
+          contactNo: number,
+        },
+      }),
+    );
+  }
+
+  async createCustomer(
+    apiArgs: Prisma.CustomerCreateInput & Prisma.CustomerUpdateInput,
+  ) {
+    return lastValueFrom(
+      this.httpService.post<Customer>(`customer`, apiArgs, {
+        headers: {
+          Authorization: `bearer ${this.token}`,
+        },
+      }),
+    );
+  }
+
+  async getOrderStatus(apiArgs: {
+    lastSyncTime?: Date;
+    skip: number;
+    take: number;
+  }) {
+    return lastValueFrom(
+      this.httpService.get(`order/order-status`, {
+        headers: {
+          Authorization: `bearer ${this.token}`,
+        },
+        params: apiArgs,
+      }),
     );
   }
 }

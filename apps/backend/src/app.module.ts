@@ -14,6 +14,12 @@ import { SyncModule } from './sync/sync.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventsService } from './event.service';
+import { CustomerModule } from './customer/customer.module';
+import { RestaurantModule } from './restaurant/restaurant.module';
+import { OrderModule } from './order/order.module';
+import { PrinterModule } from './printer/printer.module';
+import { BillingModule } from './billing/billing.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -32,6 +38,12 @@ import { EventsService } from './event.service';
     LicenseModule,
     ApiModule,
     SyncModule,
+    CustomerModule,
+    RestaurantModule,
+    OrderModule,
+    PrinterModule,
+    BillingModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [AppService, EventsService],

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { IconChevronsLeft, IconMenu2, IconX } from '@tabler/icons-react';
 import { Layout, LayoutHeader } from './custom/layout';
 import { Button } from './custom/button';
@@ -6,6 +6,8 @@ import Nav from './nav';
 import { cn } from '@/lib/utils';
 import { sidelinks } from '@/data/sidelinks';
 import { useParams } from 'react-router-dom';
+import { useAppDispatch } from '@/hooks/redux';
+import { getShopDetails } from '@/redux/features/shopSlice';
 
 interface SidebarProps extends React.HTMLAttributes<HTMLElement> {
   isCollapsed: boolean;
@@ -19,6 +21,15 @@ export default function Sidebar2({
 }: SidebarProps) {
   const [navOpened, setNavOpened] = useState(false);
   const { shopId } = useParams<{ shopId: string }>();
+  const dispatch = useAppDispatch();
+
+  const fetchShopDetails = useCallback(async (id: string) => {
+    return dispatch(getShopDetails(id)).unwrap();
+  }, []);
+
+  useEffect(() => {
+    if (shopId) fetchShopDetails(shopId);
+  }, [shopId, fetchShopDetails]);
 
   /* Make body not scrollable when navBar is opened */
   useEffect(() => {

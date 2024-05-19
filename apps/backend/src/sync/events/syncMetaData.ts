@@ -1,5 +1,5 @@
 export class SyncMetaDataEvent {
   shopId: string;
-  token: string;
+  token?: string;
   licenseNumber?: string;
 }

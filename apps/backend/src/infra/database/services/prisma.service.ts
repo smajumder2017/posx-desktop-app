@@ -5,8 +5,6 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import log from 'electron-log/main';
-log.initialize();
 @Injectable()
 export class PrismaService
   extends PrismaClient
@@ -17,7 +15,6 @@ export class PrismaService
   async onModuleInit() {
     await this.$connect();
     this.logger.log('Connected to db');
-    log.info('Connected to db');
   }
 
   async onModuleDestroy() {

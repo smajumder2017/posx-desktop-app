@@ -35,7 +35,7 @@ export class LicenseController {
       syncEvent.shopId = licenseRes.data.license.shopId;
       syncEvent.token = licenseRes.data.accessToken;
       syncEvent.licenseNumber = license.number;
-      this.eventEmitter.emit('syncMetaData', syncEvent);
+      this.eventEmitter.emit('syncDownData', syncEvent);
 
       // this.syncService.sync(
       //   licenseRes.data.license.shopId,

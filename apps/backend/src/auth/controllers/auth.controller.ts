@@ -11,6 +11,7 @@ import { AuthService } from '../services/auth.service';
 import { UserService } from '../../user/services/user.service';
 import { LoginDto, LoginResponseDto } from '../dto/auth.dto';
 import * as bcrypt from 'bcryptjs';
+import { JwtPayload } from '../interfaces';
 
 @Controller('auth')
 export class AuthController {
@@ -36,12 +37,16 @@ export class AuthController {
     if (!validPassword) {
       throw new BadRequestException('Password Mismached');
     }
-    const payload = {
+    const payload: JwtPayload = {
       id: user.id,
+      email: user.email,
       userName: user.userName,
       isActive: user.isActive,
-      // restaurantId: user.restaurantId,
+      userShops: user.userShops,
       userRoles: user.userRoles,
+      contactNo: user.contactNo,
+      firstName: user.firstName,
+      lastName: user.lastName,
     };
     const accessToken = await this.authService.generateAccessToken(payload);
     // const refreshToken = await this.authService.generateRefreshToken(payload);

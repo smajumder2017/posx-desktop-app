@@ -32,6 +32,8 @@ model User {
   updatedAt DateTime    @updatedAt
   userShops UserShop[]
   userRoles UserRoles[]
+  order     Order[]
+  billing   Billing[]
 }
 
 model UserRoles {
@@ -82,7 +84,8 @@ model Shop {
   userShop       UserShop[]
   menuCategory   MenuCategory[]
   menuItems      MenuItems[]
-  License        License[]
+  license        License[]
+  billing        Billing[]
 }
 
 model License {
@@ -119,7 +122,7 @@ model MenuItems {
   price        Float
   waitingTime  Int
   spiceScale   String
-  servingType  String
+  servingTime  String
   itemImageUrl String
   categoryId   String
   shopId       String
@@ -130,11 +133,88 @@ model MenuItems {
 }
 
 model Customer {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   name      String
-  contactNo String   @unique
-  gender    String
-  dob       DateTime
+  contactNo String    @unique
+  gender    String?
+  dob       DateTime?
+  isSynced  Boolean?  @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Order     Order[]
+  bills     Billing[]
+}
+
+model OrderStatus {
+  id        Int      @id
+  value     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  orders    Order[]
+}
+
+model Order {
+  id                 String      @id
+  orderNumber        String
+  shopId             String
+  customerId         String?
+  employeeId         String?
+  orderStatusId      Int
+  isClosed           Boolean     @default(false)
+  isSynced           Boolean     @default(false)
+  cancellationReason String?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  items              OrderItem[]
+  orderStatus        OrderStatus @relation(fields: [orderStatusId], references: [id])
+  employee           User?       @relation(fields: [employeeId], references: [id])
+  customer           Customer?   @relation(fields: [customerId], references: [id])
+  bills              Billing[]
+}
+
+model OrderItem {
+  id              String   @id @default(uuid())
+  orderId         String
+  itemId          String
+  itemName        String
+  price           Float
+  quantity        Int
+  rejectionReason String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  order           Order    @relation(fields: [orderId], references: [id])
+}
+
+model Billing {
+  id             String    @id @default(uuid())
+  orderId        String
+  shopId         String
+  customerId     String
+  employeeId     String
+  isActive       Boolean   @default(true)
+  isSetteled     Boolean
+  isSynced       Boolean   @default(false)
+  amount         Float
+  discount       Float     @default(0)
+  gst            Float     @default(0)
+  serviceCharges Float     @default(0)
+  totalAmount    Float
+  roundoffDiff   Float
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  order          Order     @relation(fields: [orderId], references: [id])
+  shop           Shop      @relation(fields: [shopId], references: [id])
+  user           User      @relation(fields: [employeeId], references: [id])
+  customer       Customer  @relation(fields: [customerId], references: [id])
+  payments       Payment[]
+}
+
+model Payment {
+  id             String   @id @default(uuid())
+  billId         String
+  amountRecieved Float
+  paymentMode    String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  bill           Billing  @relation(fields: [billId], references: [id])
 }

@@ -5,9 +5,7 @@ import { IconRefresh, IconRefreshAlert } from '@tabler/icons-react';
 export const SyncStatusBar = () => {
   const [message, setMessage] = useState<{ message: string; status: string }>();
   useEffect(() => {
-    const eventSource = new EventSource(
-      'http://localhost:8080/api/syncStatusEvent',
-    );
+    const eventSource = new EventSource('/api/syncStatusEvent');
     eventSource.onmessage = ({ data }) => {
       setMessage(JSON.parse(data));
       // console.log('New message', JSON.parse(data));

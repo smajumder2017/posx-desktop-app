@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { ApiService } from 'src/api/services/api.service';
 import { PrismaService } from 'src/infra/database/services/prisma.service';
@@ -9,6 +9,7 @@ import { EventsService } from 'src/event.service';
 
 @Injectable()
 export class SyncService {
+  private readonly logger = new Logger(SyncService.name);
   constructor(
     private readonly apiService: ApiService,
     private readonly prismaService: PrismaService,
@@ -16,7 +17,7 @@ export class SyncService {
     private readonly eventService: EventsService,
   ) {}
 
-  @Cron('30 * * * *')
+  @Cron('0 */3 * * * *')
   async syncTask() {
     try {
       const activeLicenses = await this.licenseService.getActiveLicense();
@@ -27,79 +28,85 @@ export class SyncService {
           where: { userRoles: { some: { role: { value: 'OWNER' } } } },
           include: { userRoles: { include: { role: true } } },
         });
-        const token = await this.apiService.getShopToken(
-          user.id,
-          licenseRes.license.number,
-        );
+        await this.apiService.getShopToken(user.id, licenseRes.license.number);
         syncEvent.shopId = licenseRes.license.shopId;
         syncEvent.licenseNumber = licenseRes.license.number;
-        syncEvent.token = token.data.accessToken;
-        this.eventService.emit('syncMetaData', syncEvent);
+        this.eventService.emit('syncDownData', syncEvent);
+        this.eventService.emit('syncUpData', syncEvent);
       }
 
-      console.log('running sync...');
+      this.logger.log('Sync started...');
     } catch (error) {
-      console.log('error', error);
+      this.logger.error(error, error.stack);
     }
   }
 
-  @OnEvent('syncMetaData')
-  async sync(event: SyncMetaDataEvent) {
-    const { shopId, token, licenseNumber } = event;
+  @OnEvent('syncDownData')
+  async syncDown(event: SyncMetaDataEvent) {
+    const { shopId, licenseNumber, token } = event;
+    console.log(shopId);
     try {
       this.eventService.emit('syncStatus', {
         message: 'Sync initiated',
         status: 'INIT',
       });
-      this.apiService.setToken(token);
+      if (token) {
+        this.apiService.setToken(token);
+      }
+
       await this.syncRoles();
       this.eventService.emit('syncStatus', {
         message: 'Roles synced',
         status: 'PROGRESS',
       });
-      console.log('role synced');
+      this.logger.log('role synced');
       await this.syncShopTypes();
       this.eventService.emit('syncStatus', {
         message: 'Shop types synced',
         status: 'PROGRESS',
       });
-      console.log('shop type synced');
+      await this.syncOrderStatus();
+      this.eventService.emit('syncStatus', {
+        message: 'Order Statuses synced',
+        status: 'PROGRESS',
+      });
+      this.logger.log('shop type synced');
       await this.syncUsersByShopId(shopId);
       this.eventService.emit('syncStatus', {
         message: 'Users synced',
         status: 'PROGRESS',
       });
-      console.log('user synced');
+      this.logger.log('user synced');
       await this.syncUserRoles();
       this.eventService.emit('syncStatus', {
         message: 'User roles synced',
         status: 'PROGRESS',
       });
-      console.log('user-role synced');
+      this.logger.log('user-role synced');
       await this.syncShopDetails(shopId);
       this.eventService.emit('syncStatus', {
         message: 'Shop details synced',
         status: 'PROGRESS',
       });
-      console.log('shop synced');
+      this.logger.log('shop synced');
       await this.syncShopUsers(shopId);
       this.eventService.emit('syncStatus', {
         message: 'Shop users synced',
         status: 'PROGRESS',
       });
-      console.log('user-shop synced');
+      this.logger.log('user-shop synced');
       await this.syncShopMenuCategory(shopId);
       this.eventService.emit('syncStatus', {
         message: 'Shop menu category synced',
         status: 'PROGRESS',
       });
-      console.log('menu-category synced');
+      this.logger.log('menu-category synced');
       await this.syncShopMenuItem(shopId);
       this.eventService.emit('syncStatus', {
         message: 'Shop menu items synced',
         status: 'PROGRESS',
       });
-      console.log('menu-item synced');
+      this.logger.log('menu-item synced');
       if (licenseNumber) {
         this.eventService.emit('syncStatus', {
           message: 'Licenses synced',
@@ -112,11 +119,22 @@ export class SyncService {
         status: 'SUCCESS',
       });
     } catch (error) {
-      console.log(error);
+      console.log('Sync down error');
+      this.logger.log(error);
       this.eventService.emit('syncStatus', {
         message: 'Sync failed',
         status: 'ERROR',
       });
+    }
+  }
+
+  @OnEvent('syncUpData')
+  async syncUp() {
+    try {
+      await this.syncCustomers();
+    } catch (error) {
+      console.log('Sync up error', error.response.data);
+      this.logger.error(error, error.stack);
     }
   }
 
@@ -164,6 +182,32 @@ export class SyncService {
       hasNext = shopTypeRes.data.hasNext;
       for (const role of shopTypeRes.data.shopTypes) {
         await this.prismaService.shopType.upsert({
+          where: { id: role.id },
+          create: role,
+          update: role,
+        });
+      }
+    }
+  }
+
+  private async syncOrderStatus() {
+    const orderStatus = await this.prismaService.orderStatus.findMany({
+      orderBy: { updatedAt: 'asc' },
+    });
+    const lastSyncTime = orderStatus[0]?.updatedAt;
+    let hasNext = true;
+    const take = 100;
+    let skip = 0;
+    while (hasNext) {
+      const orderStatusRes = await this.apiService.getOrderStatus({
+        skip,
+        take,
+        lastSyncTime,
+      });
+      skip = skip + take;
+      hasNext = orderStatusRes.data.hasNext;
+      for (const role of orderStatusRes.data.orderStatuses) {
+        await this.prismaService.orderStatus.upsert({
           where: { id: role.id },
           create: role,
           update: role,
@@ -319,6 +363,7 @@ export class SyncService {
       skip = skip + take;
       hasNext = menuItemRes.data.hasNext;
       for (const item of menuItemRes.data.menuItems) {
+        item.servingTime = JSON.stringify(item.servingTime);
         await this.prismaService.menuItems.upsert({
           where: { id: item.id },
           create: item,
@@ -326,5 +371,23 @@ export class SyncService {
         });
       }
     }
+  }
+
+  private async syncCustomers() {
+    const nonSyncedCustomers = await this.prismaService.customer.findMany({
+      where: { isSynced: false },
+    });
+
+    const callArr = nonSyncedCustomers.map(async (customer) => {
+      delete customer.isSynced;
+      const cust = this.apiService.createCustomer(customer);
+      await this.prismaService.customer.update({
+        data: { isSynced: true },
+        where: { contactNo: customer.contactNo },
+      });
+      return cust;
+    });
+
+    return Promise.all(callArr);
   }
 }

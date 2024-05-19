@@ -2,6 +2,7 @@ import { combineReducers, configureStore } from '@reduxjs/toolkit';
 
 import authSlice from './features/authSlice';
 import licenseSlice from './features/licenseSlice';
+import shopSlice from './features/shopSlice';
 import { createLogger } from 'redux-logger';
 // import orderSlice from "./features/order/orderSlice";
 // import printerSlice from "./features/printer/printerSlice";
@@ -14,6 +15,7 @@ const logger = createLogger();
 const rootReducer = combineReducers({
   auth: authSlice.reducer,
   license: licenseSlice.reducer,
+  shop: shopSlice.reducer,
   // restaurants: restaurantSlice.reducer,
   // tables: tableSlice.reducer,
   // tickets: ticketSlice.reducer,

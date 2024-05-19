@@ -3,7 +3,7 @@ import {
   ILoginRequest,
   // ICreateUserRequest,
   // ILoginRequest,
-  ILoginResponse,
+  // ILoginResponse,
   IUserInfoResponse,
 } from '../../models/auth';
 import { IResponseError } from '../../models/common';
@@ -18,8 +18,8 @@ type SliceState<T> = {
   asyncStatus: RequestStatus;
 };
 
-const initialState: SliceState<Partial<ILoginResponse & IUserInfoResponse>> = {
-  data: {},
+const initialState: SliceState<IUserInfoResponse> = {
+  data: null,
   error: null,
   asyncStatus: RequestStatus.Init,
 };

@@ -1,9 +1,13 @@
-// import { Roles } from 'src/enums';
+import { UserShop, UserRoles } from '@prisma/client';
 
 export interface JwtPayload {
   id: string;
   userName: string;
-  userRoles: any;
+  email: string;
   isActive: boolean;
-  // restaurantId: string;
+  firstName: string;
+  lastName: string;
+  contactNo: string;
+  userShops: UserShop[];
+  userRoles: UserRoles[];
 }
