@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   Post,
+  Query,
 } from '@nestjs/common';
 import { PrinterService } from '../services/printer.service';
 import { PrintBillDto, PrintDto } from '../dto/printer.dto';
@@ -11,6 +12,19 @@ import { PrintBillDto, PrintDto } from '../dto/printer.dto';
 @Controller('printer')
 export class PrinterController {
   constructor(private readonly pinterService: PrinterService) {}
+
+  @Get('status')
+  async checkPrinterConnectedStatus(
+    @Query('type') type: string,
+    @Query('value') value: string,
+  ) {
+    const connection =
+      type === 'network' ? `tcp://${value}` : `printer:${value}`;
+    console.log(connection);
+    this.pinterService.setPrinter(connection);
+    const status = await this.pinterService.getPrinterStatus();
+    return { status };
+  }
 
   @Get()
   getPrinters() {

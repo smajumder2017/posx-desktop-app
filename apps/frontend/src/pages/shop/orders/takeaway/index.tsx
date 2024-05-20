@@ -74,7 +74,7 @@ export default function Takeaway() {
   return (
     <>
       {/* ===== Main ===== */}
-      <LayoutBody className="space-y-4">
+      <LayoutBody className="space-y-2">
         <div className="flex items-center justify-between space-y-2">
           <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
             Takeaway

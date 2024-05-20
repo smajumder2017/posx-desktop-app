@@ -31,6 +31,7 @@ export interface IOrderResponse {
   employeeId?: null;
   isActive: boolean;
   isSynced: boolean;
+  isClosed: boolean;
   createdAt: string;
   updatedAt: string;
   items?: IOrderItemsResponse[] | null;

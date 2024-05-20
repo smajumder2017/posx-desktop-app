@@ -29,7 +29,7 @@ interface IOrderMenuCategoryProps {
 export const OrderMenuCategory: React.FC<IOrderMenuCategoryProps> = ({
   data,
 }) => {
-  return <div className="font-bold text-lg">{data}</div>;
+  return <div className="font-bold text-base">{data}</div>;
 };
 
 interface IOrderMenuItemProps {

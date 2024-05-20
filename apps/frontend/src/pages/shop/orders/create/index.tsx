@@ -1,7 +1,7 @@
 import { LayoutBody } from '@/components/custom/layout';
 import OrderSummary from '../components/order-summary';
 import Menu from '../components/menu';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useCallback, useEffect, useState } from 'react';
 import * as apis from '@/apis';
 import { ICustomer } from '@/models/customer';
@@ -29,8 +29,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import BillingForm from '../components/billing-form';
+import BillingForm, { IBillingFormPayload } from '../components/billing-form';
 import { posXDB } from '@/db/db';
+import { ICreateBillRequest } from '@/models/billing';
 
 export default function CreateOrder() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -49,6 +50,7 @@ export default function CreateOrder() {
   const [itemToDelete, setItemToDelete] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
   const [openBilling, setOpenBilling] = useState(false);
+  const navigate = useNavigate();
 
   const getCustomer = useCallback(async (id: string) => {
     setLoading(true);
@@ -84,7 +86,10 @@ export default function CreateOrder() {
   }) => {
     console.log(shopState.data);
     try {
-      const kitchenPrinter = await posXDB.printers.where('printerLocation').equals("kitchen").toArray();
+      const kitchenPrinter = await posXDB.printers
+        .where('printerLocation')
+        .equals('kitchen')
+        .toArray();
       if (shopState.data && orderDetails && kitchenPrinter.length) {
         const payload: IPrintTicketRequest = {
           interface: kitchenPrinter[0].printerValue,
@@ -155,10 +160,14 @@ export default function CreateOrder() {
   const getOrderDetails = useCallback(async (orderId: string) => {
     try {
       const orderDetailsResponse = await apis.getOrderById(orderId);
+      if (orderDetailsResponse.data.isClosed) {
+        navigate(-2);
+      }
       setOrderDetails(orderDetailsResponse.data);
     } catch (error) {
       console.log(error);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleItemDeleteClick = (itemId: string) => {
@@ -196,6 +205,65 @@ export default function CreateOrder() {
 
       setRejectionReason('');
       setItemToDelete('');
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleGenerateBillClick = async (payload: IBillingFormPayload) => {
+    const employee = authState.data;
+    const shopDetails = shopState.data;
+    try {
+      if (customer && orderDetails && employee && shopDetails) {
+        const billPayload: ICreateBillRequest = {
+          amount: payload.totalPrice || 0,
+          customerId: customer.id,
+          employeeId: employee.id,
+          gst: payload.gst,
+          discount: payload.discount,
+          orderId: orderDetails.id,
+          serviceCharges: payload.serviceCharges,
+          shopId: orderDetails.shopId,
+        };
+        const billResponse = await apis.createBill(billPayload);
+        await apis.capturePayment({
+          amountRecieved: billResponse.data.totalAmount,
+          billId: billResponse.data.id,
+          paymentMode: payload.paymentMode,
+        });
+
+        const billingPrinter = await posXDB.printers
+          .where('printerLocation')
+          .equals('billing')
+          .toArray();
+        if (billingPrinter.length) {
+          await apis.printBill({
+            interface: billingPrinter[0].printerValue,
+            amount: billResponse.data.amount,
+            customerName: customer.name,
+            employeeName: employee.firstName + ' ' + employee.lastName,
+            orderId: orderDetails.id,
+            orderNumber: orderDetails.orderNumber,
+            grandTotal: billResponse.data.totalAmount,
+            roundOff: billResponse.data.roundoffDiff,
+            shopAddress: shopDetails.address,
+            shopContact: shopDetails.contactNo,
+            orderItems: orderDetails.items || [],
+            shopName: shopDetails.shopName,
+            totalQty:
+              orderDetails.items?.reduce(
+                (acc, curr) => acc + curr.quantity,
+                0,
+              ) || 0,
+            gst: {
+              gstNumber: shopDetails.registrationNo,
+              amount: payload.gst,
+              percentage: payload.gst ? '5' : '0',
+            },
+          });
+        }
+        await getOrderDetails(orderDetails.id);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -240,10 +308,10 @@ export default function CreateOrder() {
 
       <div className="pt-4">
         <div className="flex-1 grid grid-flow-col grid-cols-12 space-x-4">
-          <div className="col-span-8">
+          <div className="col-span-8 2xl:col-span-9">
             {menu.length && <Menu data={menu} onItemSelect={onMenuItemClick} />}
           </div>
-          <div className="col-span-4">
+          <div className="col-span-4 2xl:col-span-3">
             <OrderSummary
               shopDetails={shopState.data}
               onQtyChange={onMenuItemClick}
@@ -308,8 +376,7 @@ export default function CreateOrder() {
         onOpenChange={setOpenBilling}
         orderDetails={orderDetails}
         customer={customer}
-        employee={authState.data}
-        shopDetails={shopState.data}
+        onFormSubmit={handleGenerateBillClick}
       />
     </LayoutBody>
   );

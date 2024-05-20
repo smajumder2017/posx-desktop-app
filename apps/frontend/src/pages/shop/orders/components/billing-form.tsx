@@ -33,35 +33,34 @@ import {
 } from '@/components/ui/table';
 import { formatPrice } from '@/utils/currency';
 import { useState } from 'react';
-import { ICreateBillRequest } from '@/models/billing';
-import * as apis from '@/apis';
-import { IUserInfoResponse } from '@/models/auth';
-import { IShopResponse } from '@/models/shop';
-import { posXDB } from '@/db/db';
 
+export interface IBillingFormPayload {
+  totalPrice: number;
+  gst: number;
+  discount: number;
+  serviceCharges: number;
+  paymentMode: string;
+}
 interface IBillingFormProps {
   open: boolean;
   onOpenChange: (value: boolean) => void;
   orderDetails?: IOrderResponse;
   customer?: ICustomer;
-  employee: IUserInfoResponse | null;
-  shopDetails?: IShopResponse | null;
+  onFormSubmit: (payload: IBillingFormPayload) => Promise<void>;
 }
 
 const BillingForm: React.FC<IBillingFormProps> = ({
   open,
   onOpenChange,
   orderDetails,
-  customer,
-  employee,
-  shopDetails,
+  // customer,
+  onFormSubmit,
 }) => {
   const [paymentMode, setPaymentMode] = useState('');
   const [serviceCharge, setServiceCharge] = useState(false);
   const [gstCharge, setGstCharge] = useState(true);
   const [packingCharge, setPackingCharge] = useState(false);
   const [discount] = useState(0);
-
   const totalPrice = orderDetails?.items?.reduce((acc, curr) => {
     return acc + curr.quantity * curr.price;
   }, 0);
@@ -71,54 +70,13 @@ const BillingForm: React.FC<IBillingFormProps> = ({
     serviceCharge && totalPrice ? (totalPrice * 7) / 100 : 0;
 
   const handleGenerateBillClick = async () => {
-    try {
-      if (customer && orderDetails && employee && shopDetails) {
-        const billPayload: ICreateBillRequest = {
-          amount: totalPrice || 0,
-          customerId: customer.id,
-          employeeId: employee.id,
-          gst,
-          discount,
-          orderId: orderDetails.id,
-          serviceCharges: serviceChargeAmnt,
-          shopId: orderDetails.shopId,
-        };
-        const billResponse = await apis.createBill(billPayload);
-        await apis.capturePayment({
-          amountRecieved: billResponse.data.totalAmount,
-          billId: billResponse.data.id,
-          paymentMode,
-        });
-        const billingPrinter = await posXDB.printers.where('printerLocation').equals('billing').toArray();
-        if(billingPrinter.length) {
-          await apis.printBill({
-            interface: billingPrinter[0].printerValue,
-            amount: billResponse.data.amount,
-            customerName: customer.name,
-            employeeName: employee.firstName + ' ' + employee.lastName,
-            orderId: orderDetails.id,
-            orderNumber: orderDetails.orderNumber,
-            grandTotal: billResponse.data.totalAmount,
-            roundOff: billResponse.data.roundoffDiff,
-            shopAddress: shopDetails.address,
-            shopContact: shopDetails.contactNo,
-            orderItems: orderDetails.items || [],
-            shopName: shopDetails.shopName,
-            totalQty:
-              orderDetails.items?.reduce((acc, curr) => acc + curr.quantity, 0) ||
-              0,
-            gst: {
-              gstNumber: shopDetails.registrationNo,
-              amount: gst,
-              percentage: '5',
-            },
-          });
-        }
-        
-      }
-    } catch (error) {
-      console.log(error);
-    }
+    onFormSubmit({
+      totalPrice: totalPrice || 0,
+      gst,
+      serviceCharges: serviceChargeAmnt,
+      discount,
+      paymentMode,
+    });
   };
 
   return (

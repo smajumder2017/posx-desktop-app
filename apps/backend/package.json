@@ -16,8 +16,8 @@
     }
   },
   "scripts": {
-    "dev": "npx electron-rebuild && tsc -p electron && electron .",
-    "stale:dev": "nest start --watch --preserveWatchOutput",
+    "electron:dev": "npx electron-rebuild && tsc -p electron && electron .",
+    "dev": "npm rebuild && nest start --watch --preserveWatchOutput",
     "build:stale": "nest build",
     "build": "rimraf dist && tsc -p electron && npx electron-rebuild",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",

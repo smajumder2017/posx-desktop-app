@@ -10,7 +10,11 @@ import {
   IOrderUpdateRequest,
 } from '@/models/order';
 import { IShopResponse } from '@/models/shop';
-import { IPrintBillPayload, IPrintTicketRequest, IPrinter } from '@/models/printer';
+import {
+  IPrintBillPayload,
+  IPrintTicketRequest,
+  IPrinter,
+} from '@/models/printer';
 
 import axios from 'axios';
 import {
@@ -127,4 +131,10 @@ export const getActiveBill = (orderId: string) =>
 export const capturePayment = (apiArgs: ICreatePaymentRequest) =>
   axios.post<ICreatePaymentResponse>(`${serverUrl}/payment`, apiArgs);
 
-export const getPrinters = () => axios.get<IPrinter[]>(`http://localhost:8080/api/printer`);
+export const getPrinters = () =>
+  axios.get<IPrinter[]>(`http://localhost:8080/api/printer`);
+
+export const getPrinterStatus = (apiArgs: { type: string; value: string }) =>
+  axios.get<{ status: boolean }>(`http://localhost:8080/api/printer/status`, {
+    params: apiArgs,
+  });

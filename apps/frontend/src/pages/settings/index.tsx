@@ -32,7 +32,7 @@ export default function Settings() {
           <aside className="sticky top-0 lg:w-1/5">
             <SidebarNav items={sidebarNavItems(shopId)} />
           </aside>
-          <div className="w-full p-1 pr-4 lg:max-w-xl">
+          <div className="w-full p-1 pr-4">
             <div className="pb-16">
               <Outlet />
             </div>
