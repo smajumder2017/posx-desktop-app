@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ShopService } from './services/shop.service';
-import { DatabaseModule } from 'src/infra/database/database.module';
+import { DatabaseModule } from '../infra/database/database.module';
 import { ShopController } from './controllers/shop.controller';
 
 @Module({

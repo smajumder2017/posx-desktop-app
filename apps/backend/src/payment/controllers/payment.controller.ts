@@ -6,10 +6,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { PaymentService } from '../services/payment.service';
-import { BillingService } from 'src/billing/services/billing.service';
+import { BillingService } from '../../billing/services/billing.service';
 import { CreatePaymentDto } from '../dto/payment.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { OrderService } from 'src/order/services/order.service';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { OrderService } from '../../order/services/order.service';
 
 @Controller('payment')
 export class PaymentController {

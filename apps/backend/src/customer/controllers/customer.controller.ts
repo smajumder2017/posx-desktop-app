@@ -1,11 +1,11 @@
 import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { CustomerService } from '../services/customer.service';
 import { CreateCustomerDto } from '../dto/customer.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { GetUser } from 'src/auth/decorators/user.decorator';
-import { JwtPayload } from 'src/auth/interfaces';
-import { ApiService } from 'src/api/services/api.service';
-import { LicenseService } from 'src/license/services/license.service';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { GetUser } from '../../auth/decorators/user.decorator';
+import { JwtPayload } from '../../auth/interfaces';
+import { ApiService } from '../../api/services/api.service';
+import { LicenseService } from '../../license/services/license.service';
 
 @Controller('customer')
 export class CustomerController {

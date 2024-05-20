@@ -18,7 +18,7 @@
     "build": "turbo run build",
     "migrate": "npm run --workspace backend migrate",
     "start": "electron-forge start",
-    "clean": "rimraf out && rimraf node_modules/backend && rimraf node_modules/backend",
+    "clean": "rimraf out && rimraf node_modules/backend && rimraf node_modules/frontend",
     "package": "npm run clean && electron-forge package",
     "make": "electron-forge make"
   },
@@ -43,7 +43,6 @@
     "turbo": "^1.10.16"
   },
   "dependencies": {
-    "@thiagoelg/node-printer": "^0.6.2",
     "electron-squirrel-startup": "^1.0.0",
     "is-online": "^10.0.0"
   }

@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { PaymentService } from './services/payment.service';
 import { PaymentController } from './controllers/payment.controller';
-import { DatabaseModule } from 'src/infra/database/database.module';
-import { BillingModule } from 'src/billing/billing.module';
-import { OrderModule } from 'src/order/order.module';
+import { DatabaseModule } from '../infra/database/database.module';
+import { BillingModule } from '../billing/billing.module';
+import { OrderModule } from '../order/order.module';
 
 @Module({
   imports: [DatabaseModule, BillingModule, OrderModule],

@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { LicenseService } from '../services/license.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { SyncMetaDataEvent } from 'src/sync/events/syncMetaData';
+import { SyncMetaDataEvent } from '../../sync/events/syncMetaData';
 
 @Controller('license')
 export class LicenseController {

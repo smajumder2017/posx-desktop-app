@@ -1,9 +1,9 @@
 import { Outlet, useParams } from 'react-router-dom';
 import {
-  IconBrowserCheck,
-  IconExclamationCircle,
-  IconNotification,
-  IconPalette,
+  // IconBrowserCheck,
+  // IconExclamationCircle,
+  // IconNotification,
+  // IconPalette,
   IconTool,
   IconUser,
 } from '@tabler/icons-react';

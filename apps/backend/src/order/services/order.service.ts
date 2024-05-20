@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import * as moment from 'moment';
-import { PrismaService } from 'src/infra/database/services/prisma.service';
+import { PrismaService } from '../../infra/database/services/prisma.service';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const orderId = require('order-id');

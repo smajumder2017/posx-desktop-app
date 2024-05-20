@@ -60,7 +60,7 @@ const BillingForm: React.FC<IBillingFormProps> = ({
   const [serviceCharge, setServiceCharge] = useState(false);
   const [gstCharge, setGstCharge] = useState(true);
   const [packingCharge, setPackingCharge] = useState(false);
-  const [discount, setDiscount] = useState(0);
+  const [discount] = useState(0);
 
   const totalPrice = orderDetails?.items?.reduce((acc, curr) => {
     return acc + curr.quantity * curr.price;

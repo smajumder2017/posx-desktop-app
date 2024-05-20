@@ -40,6 +40,11 @@ const createWindow = async () => {
         shell.openExternal(`http://localhost:${isDev ? 5173 : 8080}`);
         log.info(app.getAppPath());
       });
+    } else {
+      await bootstrap();
+      win.loadFile('./electron/index.html');
+      shell.openExternal(`http://localhost:${isDev ? 5173 : 8080}`);
+      log.info(app.getAppPath());
     }
   } catch (error) {
     log.error(error);

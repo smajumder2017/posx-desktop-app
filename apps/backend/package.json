@@ -16,9 +16,10 @@
     }
   },
   "scripts": {
-    "electron:dev": "tsc -p electron && electron .",
-    "dev": "nest start --watch --preserveWatchOutput",
-    "build": "nest build",
+    "dev": "npx electron-rebuild && tsc -p electron && electron .",
+    "stale:dev": "nest start --watch --preserveWatchOutput",
+    "build:stale": "nest build",
+    "build": "rimraf dist && tsc -p electron && npx electron-rebuild",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "electron-forge start",
     "start:dev": "nest start --watch",
@@ -45,6 +46,7 @@
     "@nestjs/serve-static": "^4.0.0",
     "@nestjs/swagger": "^7.3.1",
     "@prisma/client": "^5.13.0",
+    "@thiagoelg/node-printer": "^0.6.2",
     "@types/bcryptjs": "^2.4.6",
     "axios": "^1.6.8",
     "bcryptjs": "^2.4.3",

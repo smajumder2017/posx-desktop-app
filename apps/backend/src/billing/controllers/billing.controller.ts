@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { BillingService } from '../services/billing.service';
 // import { ApiResponse } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CreateBillingDto } from '../dto/billing.dto';
 import { Prisma } from '@prisma/client';
 

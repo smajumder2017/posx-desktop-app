@@ -6,19 +6,21 @@ import {
   BreakLine,
 } from 'node-thermal-printer';
 import { IPrintBillPayload } from '../dto/printer.dto';
-import { getPrinters } from '@thiagoelg/node-printer';
 
+const electron = typeof process !== 'undefined' && process.versions && !!process.versions.electron;
 @Injectable()
 export class PrinterService {
   private printer: ThermalPrinter;
   constructor() {}
 
   async getConnectedPrinters() {
-    return getPrinters();
+    const printers = require('@thiagoelg/node-printer');
+    return printers.getPrinters();
   }
 
   setPrinter(connection: string) {
     console.log(connection.includes('printer:'))
+    
     this.printer = new ThermalPrinter({
       type: PrinterTypes.EPSON, // Printer type: 'star' or 'epson'
       // interface: 'tcp://192.168.1.23', // Printer interface

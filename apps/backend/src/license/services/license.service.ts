@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../infra/database/services/prisma.service';
-import moment from 'moment';
 import { AxiosResponse } from 'axios';
 import { License } from '@prisma/client';
-import { ApiService } from 'src/api/services/api.service';
+import { ApiService } from '../../api/services/api.service';
+
+const moment = require('moment');
 
 @Injectable()
 export class LicenseService {

@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { ApiService } from 'src/api/services/api.service';
-import { PrismaService } from 'src/infra/database/services/prisma.service';
+import { ApiService } from '../../api/services/api.service';
+import { PrismaService } from '../../infra/database/services/prisma.service';
 import { SyncMetaDataEvent } from '../events/syncMetaData';
 import { Cron } from '@nestjs/schedule';
-import { LicenseService } from 'src/license/services/license.service';
-import { EventsService } from 'src/event.service';
+import { LicenseService } from '../../license/services/license.service';
+import { EventsService } from '../../event.service';
 
 @Injectable()
 export class SyncService {
