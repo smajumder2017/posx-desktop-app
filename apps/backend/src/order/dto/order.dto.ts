@@ -24,6 +24,7 @@ export class CreateOrderItemDto
       | 'id'
       | 'orderId'
       | 'isActive'
+      |'isSynced'
       | 'createdAt'
       | 'updatedAt'
       | 'rejectionReason'
@@ -156,7 +157,7 @@ export class ICreateOrderItemsDto {
 }
 
 export class UpdateOrderItemDto
-  implements Omit<IOrderItems, 'orderId' | 'createdAt' | 'updatedAt'>
+  implements Omit<IOrderItems, 'orderId' | 'isSynced' | 'createdAt' | 'updatedAt'>
 {
   @ApiProperty()
   @IsUUID()

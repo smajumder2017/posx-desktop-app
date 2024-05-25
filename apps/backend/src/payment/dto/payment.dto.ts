@@ -3,7 +3,7 @@ import { Payment } from '@prisma/client';
 import { IsNumber, IsString, IsUUID } from 'class-validator';
 
 export class CreatePaymentDto
-  implements Omit<Payment, 'id' | 'paymentMode' | 'createdAt' | 'updatedAt'>
+  implements Omit<Payment, 'id' | 'paymentMode' | 'isSynced' | 'createdAt' | 'updatedAt'>
 {
   @ApiProperty()
   @IsUUID()
