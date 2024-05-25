@@ -35,7 +35,7 @@ export class BillingController {
       roundoffDiff: 0,
       totalAmount: 0,
     };
-    const existingBill = await this.billingService.findActiveBillByOrderId(
+    const existingBill = await this.billingService.findBillsByOrderId(
       createBill.orderId,
     );
 

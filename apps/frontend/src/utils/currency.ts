@@ -6,7 +6,7 @@ export function formatPrice(
   const formatter = new Intl.NumberFormat(locale, {
     currency,
     style: 'currency',
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
   });
   return formatter.format(value);
 }

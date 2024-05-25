@@ -80,6 +80,7 @@ export class OrderController {
     @Query('shopId') shopId: string,
     @Query('orderStatusId') orderStatusId?: string,
     @Query('isClosed') isClosed?: string,
+    @Query('employeeId') employeeId?: string,
     @Query('skip') skip: string = '0',
     @Query('take') take: string = '100',
   ) {
@@ -89,6 +90,9 @@ export class OrderController {
     }
     if (isClosed) {
       whereOptions.isClosed = isClosed === 'true';
+    }
+    if (employeeId) {
+      whereOptions.employeeId = employeeId;
     }
     const count = await this.orderService.getOrderCount({
       where: whereOptions,

@@ -1,4 +1,3 @@
-import { LayoutBody } from '@/components/custom/layout';
 import OrderSummary from '../components/order-summary';
 import Menu from '../components/menu';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -250,6 +249,7 @@ export default function CreateOrder() {
             shopContact: shopDetails.contactNo,
             orderItems: orderDetails.items || [],
             shopName: shopDetails.shopName,
+            date: orderDetails.createdAt,
             totalQty:
               orderDetails.items?.reduce(
                 (acc, curr) => acc + curr.quantity,
@@ -279,7 +279,7 @@ export default function CreateOrder() {
   }, [customerId, getCustomer, shopId, getMenuByShop]);
 
   return (
-    <LayoutBody className="max-h-full flex flex-col flex-grow">
+    <div className="max-h-full flex flex-col flex-grow">
       <div className="flex items-center justify-between space-y-2">
         <h1 className="text-2xl font-bold tracking-tight">
           {orderId ? `Update Order` : 'New Order'}
@@ -378,6 +378,6 @@ export default function CreateOrder() {
         customer={customer}
         onFormSubmit={handleGenerateBillClick}
       />
-    </LayoutBody>
+    </div>
   );
 }

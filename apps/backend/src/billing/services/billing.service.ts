@@ -14,13 +14,20 @@ export class BillingService {
     });
   }
 
-  findActiveBillByOrderId(orderId: string) {
+  findBillsByOrderId(orderId: string) {
     return this.prismaService.billing.findFirst({
       where: { orderId, isActive: true },
     });
   }
 
-  updateById(updateBill: Prisma.BillingUpdateInput) {
+  findActiveBillByOrderId(orderId: string) {
+    return this.prismaService.billing.findFirst({
+      where: { orderId, isActive: true },
+      include: { customer: true, payments: true, employee: true, shop: true },
+    });
+  }
+
+  updateById(updateBill: Prisma.BillingUncheckedUpdateInput) {
     return this.prismaService.billing.update({
       data: updateBill,
       where: { id: updateBill.id.toString() },

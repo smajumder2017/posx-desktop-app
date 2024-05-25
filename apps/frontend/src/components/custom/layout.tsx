@@ -30,7 +30,7 @@ const LayoutHeader = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      'flex h-[var(--header-height)] flex-none items-center gap-2 bg-background p-4 md:px-8',
+      'flex h-[var(--header-height)] flex-none items-center gap-2 p-4 md:px-8',
       className,
     )}
     {...props}

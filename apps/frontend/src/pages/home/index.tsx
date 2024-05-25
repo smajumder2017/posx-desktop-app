@@ -11,7 +11,7 @@ const Home = () => {
   ) {
     return (
       <Navigate
-        to={`/${licenseState.data.shopId}/dashboard`}
+        to={`/${licenseState.data.shopId}`}
         // state={{ from: location }}
       />
     );

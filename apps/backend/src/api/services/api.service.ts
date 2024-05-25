@@ -11,7 +11,9 @@ import {
   User,
   UserRoles,
   UserShop,
+  Order,
   Prisma,
+  Payment,
 } from '@prisma/client';
 import { AxiosResponse } from 'axios';
 import { lastValueFrom } from 'rxjs';
@@ -273,6 +275,26 @@ export class ApiService {
           Authorization: `bearer ${this.token}`,
         },
         params: apiArgs,
+      }),
+    );
+  }
+
+  async createOrder(apiArgs: Order) {
+    return lastValueFrom(
+      this.httpService.post<Order>(`order`, apiArgs, {
+        headers: {
+          Authorization: `bearer ${this.token}`,
+        },
+      }),
+    );
+  }
+
+  async createPayment(apiArgs: Payment) {
+    return lastValueFrom(
+      this.httpService.post<Payment>(`payment`, apiArgs, {
+        headers: {
+          Authorization: `bearer ${this.token}`,
+        },
       }),
     );
   }

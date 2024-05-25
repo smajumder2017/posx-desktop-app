@@ -1,3 +1,7 @@
+import { IUserInfoResponse } from './auth';
+import { ICustomer } from './customer';
+import { IShopResponse } from './shop';
+
 export interface ICreateBillRequest {
   orderId: string;
   customerId: string;
@@ -26,6 +30,10 @@ export interface IBillResponse {
   roundoffDiff: number;
   createdAt: string;
   updatedAt: string;
+  customer?: ICustomer;
+  payments?: ICreatePaymentResponse[];
+  employee?: IUserInfoResponse;
+  shop?: IShopResponse;
 }
 
 export interface ICreatePaymentRequest {

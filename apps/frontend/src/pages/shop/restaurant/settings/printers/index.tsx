@@ -39,8 +39,12 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Message } from '@/components/custom/message';
+import { useCheckClientConnected } from '@/hooks/use-check-client-connected';
+import { IconAlertCircle } from '@tabler/icons-react';
 
 const Printers = () => {
+  const clientConnected = useCheckClientConnected();
   const [openAddPinter, setOpenAddPrinter] = useState(false);
   const [printers, setPrinters] = useState<IPrinter[]>([]);
   const [selectedPrinterType, setSelectedPrinterType] = useState('');
@@ -128,13 +132,23 @@ const Printers = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
+      <div className={`flex gap-4 ${clientConnected ? 'justify-end' : ''}`}>
+        {!clientConnected && (
+          <div className="flex-1">
+            <Message
+              subHeading="No printer client found, you can only add network printers now."
+              icon={<IconAlertCircle />}
+            />
+          </div>
+        )}
         <Button onClick={() => setOpenAddPrinter(true)}>Add printer</Button>
       </div>
       <Card>
         <CardHeader className="px-7">
           <CardTitle>Printers</CardTitle>
-          <CardDescription>List of configured printers</CardDescription>
+          <CardDescription>
+            List of configured printers on this machine
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -150,7 +164,11 @@ const Printers = () => {
             <TableBody>
               {savedPrinters?.map((printer) => (
                 <TableRow key={printer.id}>
-                  <TableCell>{printer.printerType.toUpperCase()}</TableCell>
+                  <TableCell>
+                    <Badge variant={'secondary'}>
+                      {printer.printerType.toUpperCase()}
+                    </Badge>
+                  </TableCell>
                   <TableCell className="font-medium">
                     {printer.printerType === 'network'
                       ? printer.printerValue.replace('tcp://', '')

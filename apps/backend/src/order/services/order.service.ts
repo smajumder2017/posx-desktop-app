@@ -37,7 +37,7 @@ export class OrderService {
   findOrderById(orderId: string) {
     return this.prismaService.order.findUnique({
       where: { id: orderId },
-      include: { items: { where: { rejectionReason: null } } },
+      include: { items: { where: { rejectionReason: null } }, customer: true },
     });
   }
 

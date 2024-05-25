@@ -38,6 +38,7 @@ export interface IPrintBillPayload {
   orderItems: IOrderItems[];
   totalQty: number;
   grandTotal: number;
+  date: string;
   amount: number;
   roundOff: number;
 }
@@ -48,12 +49,11 @@ export interface IPrinter {
   driverName: string;
   printProcessor: string;
   datatype: string;
-  status?: (null)[] | null;
+  status?: null[] | null;
   statusNumber: number;
-  attributes?: (string)[] | null;
+  attributes?: string[] | null;
   priority: number;
   defaultPriority: number;
   averagePPM: number;
   shareName?: string | null;
 }
-

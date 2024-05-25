@@ -120,10 +120,10 @@ model MenuItems {
   isActive     Boolean
   foodType     String
   price        Float
-  waitingTime  Int
+  waitingTime  Int?
   spiceScale   String
-  servingTime  String
-  itemImageUrl String
+  servingTime  String?
+  itemImageUrl String?
   categoryId   String
   shopId       String
   createdAt    DateTime     @default(now())
@@ -179,6 +179,7 @@ model OrderItem {
   itemName        String
   price           Float
   quantity        Int
+  isSynced        Boolean  @default(false)
   rejectionReason String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -204,7 +205,7 @@ model Billing {
   updatedAt      DateTime  @updatedAt
   order          Order     @relation(fields: [orderId], references: [id])
   shop           Shop      @relation(fields: [shopId], references: [id])
-  user           User      @relation(fields: [employeeId], references: [id])
+  employee       User      @relation(fields: [employeeId], references: [id])
   customer       Customer  @relation(fields: [customerId], references: [id])
   payments       Payment[]
 }
@@ -214,6 +215,7 @@ model Payment {
   billId         String
   amountRecieved Float
   paymentMode    String
+  isSynced       Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   bill           Billing  @relation(fields: [billId], references: [id])

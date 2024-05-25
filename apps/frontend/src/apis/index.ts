@@ -100,6 +100,7 @@ export const getOrderById = (orderId: string) =>
 export const getAllOrder = (apiArgs: {
   shopId: string;
   orderStatusId?: number;
+  employeeId?: string;
   isClosed?: boolean;
   skip: number;
   take: number;
@@ -116,12 +117,6 @@ export const createNewOrderItems = (
 export const updateOrderItem = (apiArgs: IOrderItemUpdateRequest) =>
   axios.put(`${serverUrl}/order/item`, apiArgs);
 
-export const printTicket = (apiArgs: IPrintTicketRequest) =>
-  axios.post(`http://localhost:8080/api/printer/print/ticket`, apiArgs);
-
-export const printBill = (apiArgs: IPrintBillPayload) =>
-  axios.post(`http://localhost:8080/api/printer/print/bill`, apiArgs);
-
 export const createBill = (apiArgs: ICreateBillRequest) =>
   axios.post<IBillResponse>(`${serverUrl}/billing`, apiArgs);
 
@@ -131,10 +126,27 @@ export const getActiveBill = (orderId: string) =>
 export const capturePayment = (apiArgs: ICreatePaymentRequest) =>
   axios.post<ICreatePaymentResponse>(`${serverUrl}/payment`, apiArgs);
 
+export const printTicket = (apiArgs: IPrintTicketRequest) => {
+  const isNetwork = apiArgs.interface.includes('tcp://');
+  const baseUrl = isNetwork ? serverUrl : 'http://localhost:8080/api';
+  return axios.post(`${baseUrl}/printer/print/ticket`, apiArgs);
+};
+
+export const printBill = (apiArgs: IPrintBillPayload) => {
+  const isNetwork = apiArgs.interface.includes('tcp://');
+  const baseUrl = isNetwork ? serverUrl : 'http://localhost:8080/api';
+  return axios.post(`${baseUrl}/printer/print/bill`, apiArgs);
+};
+
 export const getPrinters = () =>
   axios.get<IPrinter[]>(`http://localhost:8080/api/printer`);
 
 export const getPrinterStatus = (apiArgs: { type: string; value: string }) =>
-  axios.get<{ status: boolean }>(`http://localhost:8080/api/printer/status`, {
-    params: apiArgs,
-  });
+  axios.get<{ status: boolean }>(
+    `${
+      apiArgs.type === 'network' ? serverUrl : 'http://localhost:8080/api'
+    }/printer/status`,
+    {
+      params: apiArgs,
+    },
+  );

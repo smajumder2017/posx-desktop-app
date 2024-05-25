@@ -28,6 +28,7 @@ export interface IPrintBillPayload {
   orderId: string;
   serviceCharge?: number;
   gst?: IGst;
+  date: string;
   discount?: IDiscount;
   containerCharge?: number;
   orderItems: OrderItems[];
@@ -87,6 +88,10 @@ export class PrintBillDto implements IPrintBillPayload {
   @ApiProperty()
   @IsOptional()
   containerCharge?: number;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  date: string;
 
   @ApiProperty()
   @IsNotEmpty()

@@ -7,10 +7,12 @@ import { getUserInfo, login } from '@/redux/features/authSlice';
 import { ILoginRequest } from '@/models/auth';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { RequestStatus } from '@/utils/enums';
+import { getShopDetails } from '@/redux/features/shopSlice';
 
 const AuthPage = () => {
   const authState = useAppSelector((state) => state.auth);
   const licenseState = useAppSelector((state) => state.license);
+  const shopState = useAppSelector((state) => state.shop);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [userName, setUserName] = useState<string>('');
@@ -26,6 +28,11 @@ const AuthPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
+  const fetchShopInfo = useCallback(
+    async (shopId: string) => dispatch(getShopDetails(shopId)).unwrap(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
   const handleLoginClick = async () => {
     try {
       const payload = {
@@ -35,21 +42,27 @@ const AuthPage = () => {
       const response = await handleLogin(payload);
       localStorage.setItem('posxAccessToken', response.data.accessToken);
       const userInfo = await fetchuserInfo();
+
       console.log(userInfo);
 
-      if (licenseState.data?.shopId)
-        navigate('/' + licenseState.data?.shopId + '/dashboard');
+      if (licenseState.data?.shopId) {
+        const shopInfo = await fetchShopInfo(licenseState.data.shopId);
+        navigate(
+          `/${
+            licenseState.data.shopId
+          }/${shopInfo.shopType.value.toLowerCase()}/dashboard`,
+        );
+      }
     } catch (error) {
       console.log(error);
     }
   };
-  if (
-    authState.asyncStatus === RequestStatus.Success &&
-    licenseState.data?.shopId
-  ) {
+  if (authState.asyncStatus === RequestStatus.Success && shopState.data) {
     return (
       <Navigate
-        to={`/${licenseState.data.shopId}/dashboard`}
+        to={`/${
+          shopState.data.id
+        }/${shopState.data.shopType.value.toLowerCase()}/dashboard`}
         // state={{ from: location }}
       />
     );

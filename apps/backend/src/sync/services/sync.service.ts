@@ -17,7 +17,7 @@ export class SyncService {
     private readonly eventService: EventsService,
   ) {}
 
-  @Cron('0 */3 * * * *')
+  @Cron('0 */2 * * * *')
   async syncTask() {
     try {
       const activeLicenses = await this.licenseService.getActiveLicense();
@@ -34,8 +34,6 @@ export class SyncService {
         this.eventService.emit('syncDownData', syncEvent);
         this.eventService.emit('syncUpData', syncEvent);
       }
-
-      this.logger.log('Sync started...');
     } catch (error) {
       this.logger.error(error, error.stack);
     }
@@ -59,7 +57,7 @@ export class SyncService {
         message: 'Roles synced',
         status: 'PROGRESS',
       });
-      this.logger.log('role synced');
+
       await this.syncShopTypes();
       this.eventService.emit('syncStatus', {
         message: 'Shop types synced',
@@ -70,43 +68,43 @@ export class SyncService {
         message: 'Order Statuses synced',
         status: 'PROGRESS',
       });
-      this.logger.log('shop type synced');
+
       await this.syncUsersByShopId(shopId);
       this.eventService.emit('syncStatus', {
         message: 'Users synced',
         status: 'PROGRESS',
       });
-      this.logger.log('user synced');
+
       await this.syncUserRoles();
       this.eventService.emit('syncStatus', {
         message: 'User roles synced',
         status: 'PROGRESS',
       });
-      this.logger.log('user-role synced');
+
       await this.syncShopDetails(shopId);
       this.eventService.emit('syncStatus', {
         message: 'Shop details synced',
         status: 'PROGRESS',
       });
-      this.logger.log('shop synced');
+
       await this.syncShopUsers(shopId);
       this.eventService.emit('syncStatus', {
         message: 'Shop users synced',
         status: 'PROGRESS',
       });
-      this.logger.log('user-shop synced');
+
       await this.syncShopMenuCategory(shopId);
       this.eventService.emit('syncStatus', {
         message: 'Shop menu category synced',
         status: 'PROGRESS',
       });
-      this.logger.log('menu-category synced');
+
       await this.syncShopMenuItem(shopId);
       this.eventService.emit('syncStatus', {
         message: 'Shop menu items synced',
         status: 'PROGRESS',
       });
-      this.logger.log('menu-item synced');
+
       if (licenseNumber) {
         this.eventService.emit('syncStatus', {
           message: 'Licenses synced',
@@ -120,7 +118,7 @@ export class SyncService {
       });
     } catch (error) {
       console.log('Sync down error');
-      this.logger.log(error);
+
       this.eventService.emit('syncStatus', {
         message: 'Sync failed',
         status: 'ERROR',
@@ -132,6 +130,8 @@ export class SyncService {
   async syncUp() {
     try {
       await this.syncCustomers();
+      await this.syncOrders();
+      await this.syncPayments();
     } catch (error) {
       console.log('Sync up error', error.response.data);
       this.logger.error(error, error.stack);
@@ -139,6 +139,7 @@ export class SyncService {
   }
 
   private async syncRoles() {
+    this.logger.log('Sync Process: [SCHEMA: Role]: Starting sync');
     const roles = await this.prismaService.role.findMany({
       orderBy: { updatedAt: 'asc' },
     });
@@ -147,6 +148,7 @@ export class SyncService {
     const take = 100;
     let skip = 0;
     while (hasNext) {
+      this.logger.log('Sync Process: [SCHEMA: Role]: Checking for updates');
       const roleRes = await this.apiService.getRoles({
         skip,
         take,
@@ -154,6 +156,7 @@ export class SyncService {
       });
       skip = skip + take;
       hasNext = roleRes.data.hasNext;
+      this.logger.log('Sync Process: [SCHEMA: Role]: Update found: ' + hasNext);
       for (const role of roleRes.data.roles) {
         await this.prismaService.role.upsert({
           where: { id: role.id },
@@ -162,9 +165,11 @@ export class SyncService {
         });
       }
     }
+    this.logger.log('Sync Process: [SCHEMA: Role]: Sync Complete');
   }
 
   private async syncShopTypes() {
+    this.logger.log('Sync Process: [SCHEMA: ShopType]: Starting sync');
     const shopTypes = await this.prismaService.shopType.findMany({
       orderBy: { updatedAt: 'asc' },
     });
@@ -173,6 +178,7 @@ export class SyncService {
     const take = 100;
     let skip = 0;
     while (hasNext) {
+      this.logger.log('Sync Process: [SCHEMA: ShopType]: Checking for updates');
       const shopTypeRes = await this.apiService.getShopType({
         skip,
         take,
@@ -180,6 +186,9 @@ export class SyncService {
       });
       skip = skip + take;
       hasNext = shopTypeRes.data.hasNext;
+      this.logger.log(
+        'Sync Process: [SCHEMA: ShopType]: Update found: ' + hasNext,
+      );
       for (const role of shopTypeRes.data.shopTypes) {
         await this.prismaService.shopType.upsert({
           where: { id: role.id },
@@ -188,9 +197,11 @@ export class SyncService {
         });
       }
     }
+    this.logger.log('Sync Process: [SCHEMA: ShopType]: Sync Complete');
   }
 
   private async syncOrderStatus() {
+    this.logger.log('Sync Process: [SCHEMA: OrderStatus]: Starting sync');
     const orderStatus = await this.prismaService.orderStatus.findMany({
       orderBy: { updatedAt: 'asc' },
     });
@@ -199,6 +210,9 @@ export class SyncService {
     const take = 100;
     let skip = 0;
     while (hasNext) {
+      this.logger.log(
+        'Sync Process: [SCHEMA: OrderStatus]: Checking for updates',
+      );
       const orderStatusRes = await this.apiService.getOrderStatus({
         skip,
         take,
@@ -206,6 +220,9 @@ export class SyncService {
       });
       skip = skip + take;
       hasNext = orderStatusRes.data.hasNext;
+      this.logger.log(
+        'Sync Process: [SCHEMA: OrderStatus]: Update found: ' + hasNext,
+      );
       for (const role of orderStatusRes.data.orderStatuses) {
         await this.prismaService.orderStatus.upsert({
           where: { id: role.id },
@@ -214,9 +231,11 @@ export class SyncService {
         });
       }
     }
+    this.logger.log('Sync Process: [SCHEMA: OrderStatus]: Sync Complete');
   }
 
   private async syncUsersByShopId(shopId: string) {
+    this.logger.log('Sync Process: [SCHEMA: User]: Starting sync');
     const users = await this.prismaService.user.findMany({
       orderBy: { updatedAt: 'asc' },
     });
@@ -225,6 +244,7 @@ export class SyncService {
     const take = 100;
     let skip = 0;
     while (hasNext) {
+      this.logger.log('Sync Process: [SCHEMA: User]: Checking for updates');
       const userRes = await this.apiService.getUsersByShopId({
         shopId,
         skip,
@@ -233,6 +253,7 @@ export class SyncService {
       });
       skip = skip + take;
       hasNext = userRes.data.hasNext;
+      this.logger.log('Sync Process: [SCHEMA: User]: Update found: ' + hasNext);
       for (const user of userRes.data.users) {
         await this.prismaService.user.upsert({
           where: { id: user.id },
@@ -241,6 +262,7 @@ export class SyncService {
         });
       }
     }
+    this.logger.log('Sync Process: [SCHEMA: User]: Sync Complete');
   }
 
   private async syncUserRoles() {
@@ -363,7 +385,9 @@ export class SyncService {
       skip = skip + take;
       hasNext = menuItemRes.data.hasNext;
       for (const item of menuItemRes.data.menuItems) {
-        item.servingTime = JSON.stringify(item.servingTime);
+        item.servingTime = item.servingTime
+          ? JSON.stringify(item.servingTime)
+          : '';
         await this.prismaService.menuItems.upsert({
           where: { id: item.id },
           create: item,
@@ -380,11 +404,63 @@ export class SyncService {
 
     const callArr = nonSyncedCustomers.map(async (customer) => {
       delete customer.isSynced;
-      const cust = this.apiService.createCustomer(customer);
+      const cust = await this.apiService.createCustomer(customer);
       await this.prismaService.customer.update({
         data: { isSynced: true },
         where: { contactNo: customer.contactNo },
       });
+      return cust;
+    });
+
+    return Promise.all(callArr);
+  }
+
+  private async syncOrders() {
+    const nonSyncOrders = await this.prismaService.order.findMany({
+      where: { isSynced: false, isClosed: true },
+      include: { items: true, bills: true },
+    });
+    console.log(nonSyncOrders.length);
+    const callArr = nonSyncOrders.map(async (order) => {
+      delete order.isSynced;
+      order.items.forEach((item) => delete item.isSynced);
+      order.bills.forEach((item) => delete item.isSynced);
+      console.log(order);
+      const cust = await this.apiService.createOrder(order);
+      await this.prismaService.order.update({
+        data: { isSynced: true },
+        where: { id: order.id },
+      });
+      await this.prismaService.orderItem.updateMany({
+        data: { isSynced: true },
+        where: { orderId: order.id },
+      });
+      await this.prismaService.billing.updateMany({
+        data: { isSynced: true },
+        where: { orderId: order.id },
+      });
+      return cust;
+    });
+
+    return Promise.all(callArr);
+  }
+
+  private async syncPayments() {
+    const nonSyncPayments = await this.prismaService.payment.findMany({
+      where: { isSynced: false, bill: { isSynced: true } },
+      include: { bill: true },
+    });
+
+    const callArr = nonSyncPayments.map(async (payment) => {
+      delete payment.isSynced;
+      delete payment.bill;
+      console.log(payment);
+      const cust = await this.apiService.createPayment(payment);
+      await this.prismaService.payment.update({
+        data: { isSynced: true },
+        where: { id: payment.id },
+      });
+
       return cust;
     });
 

@@ -5,15 +5,16 @@ import {
 } from 'react-router-dom';
 import AuthPage from './pages/auth';
 import Layout from './pages/shop/layout';
-import Dashboard from './pages/shop/dashboard';
-import Takeaway from './pages/shop/orders/takeaway';
+import Dashboard from './pages/shop/restaurant/dashboard';
+import Takeaway from './pages/shop/restaurant/orders/takeaway';
 import Home from './pages/home';
+import Shop from './pages/shop';
 import AuthWrapper from './components/wappers/auth-wrapper';
 import LicenseWrapper from './components/wappers/license-wrapper';
 import License from './pages/license';
-import CreateOrder from './pages/shop/orders/create';
-import Printers from './pages/settings/printers';
-import Settings from './pages/settings';
+import CreateOrder from './pages/shop/restaurant/orders/create';
+import Printers from './pages/shop/restaurant/settings/printers';
+import Settings from './pages/shop/restaurant/settings';
 
 const router = createBrowserRouter([
   {
@@ -39,7 +40,7 @@ const router = createBrowserRouter([
     element: <License />,
   },
   {
-    path: ':shopId',
+    path: ':shopId/restaurant',
     element: (
       <LicenseWrapper>
         <AuthWrapper>
@@ -76,6 +77,55 @@ const router = createBrowserRouter([
       },
     ],
   },
+  {
+    path: ':shopId',
+    element: (
+      <LicenseWrapper>
+        <AuthWrapper>
+          <Shop />
+        </AuthWrapper>
+      </LicenseWrapper>
+    ),
+  },
+  { path: '*', element: <div>Page not found</div> },
+  // {
+  //   path: ':shopId',
+  //   element: (
+  //     <LicenseWrapper>
+  //       <AuthWrapper>
+  //         <Layout />
+  //       </AuthWrapper>
+  //     </LicenseWrapper>
+  //   ),
+  //   children: [
+  //     {
+  //       path: '',
+  //       element: <Navigate to={'/'} />,
+  //     },
+  //     {
+  //       path: 'dashboard',
+  //       element: <Dashboard />,
+  //     },
+  //     {
+  //       path: 'takeaway',
+  //       element: <Takeaway />,
+  //     },
+  //     {
+  //       path: 'takeaway/:customerId',
+  //       element: <CreateOrder />,
+  //     },
+  //     {
+  //       path: 'settings',
+  //       element: <Settings />,
+  //       children: [
+  //         {
+  //           index: true,
+  //           element: <Printers />,
+  //         },
+  //       ],
+  //     },
+  //   ],
+  // },
 ]);
 
 function App() {

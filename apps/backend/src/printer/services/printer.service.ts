@@ -89,7 +89,7 @@ export class PrinterService {
     this.printer.println(`Customer: ${payload.customerName}`);
     this.printer.drawLine('-');
     this.printer.tableCustom([
-      { text: `Date: ${new Date(Date.now()).toLocaleString()}` },
+      { text: `Date: ${new Date(payload.date).toLocaleString()}` },
       // { text: 'Quantity', bold: true },
     ]);
     this.printer.tableCustom([

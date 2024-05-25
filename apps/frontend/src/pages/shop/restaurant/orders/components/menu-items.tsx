@@ -53,10 +53,13 @@ export const OrderMenuItem: React.FC<IOrderMenuItemProps> = ({ data }) => {
         ? 'text-red-500'
         : 'text-blue-500';
   return (
-    <Card className="p-0 flex w-auto mr-2 mb-2 hover:cursor-pointer">
+    <Card className="p-0 flex w-auto mr-2 mb-2 hover:cursor-pointer hover:shadow-md">
       <img
         className="h-[65px] w-[65px] rounded-l-xl"
-        src={data.itemImageUrl}
+        src={
+          data.itemImageUrl ||
+          `https://placehold.co/400x400?text=${data.itemName.replace(' ', '+')}`
+        }
         alt={data.itemName}
       />
 

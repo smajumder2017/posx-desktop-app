@@ -12,7 +12,23 @@ export class PrismaService
 {
   private readonly logger = new Logger(PrismaService.name);
 
+  constructor() {
+    super({
+      log: [
+        { emit: 'event', level: 'query' },
+        { emit: 'stdout', level: 'info' },
+        { emit: 'stdout', level: 'warn' },
+        { emit: 'stdout', level: 'error' },
+      ],
+    });
+  }
+
   async onModuleInit() {
+    // this.$on<string>('query', (event: Prisma.QueryEvent) => {
+    //   console.log('Query: ' + event.query);
+    //   console.log('Query: ' + event.params);
+    //   console.log('Duration: ' + event.duration + 'ms');
+    // });
     await this.$connect();
     this.logger.log('Connected to db');
   }
