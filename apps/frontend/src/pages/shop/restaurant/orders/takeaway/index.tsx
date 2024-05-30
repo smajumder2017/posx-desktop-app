@@ -150,8 +150,8 @@ export default function Takeaway() {
               <CardHeader className="px-7">
                 <CardTitle>Orders</CardTitle>
                 <CardDescription>
-                  (Showing {orders.length}/{totalCount}) Recent orders from your
-                  store.
+                  (Showing {orders.length}/{totalCount}) Recent orders taken by
+                  you.
                 </CardDescription>
               </CardHeader>
 

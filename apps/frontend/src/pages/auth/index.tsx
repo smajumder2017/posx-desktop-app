@@ -8,6 +8,8 @@ import { ILoginRequest } from '@/models/auth';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { RequestStatus } from '@/utils/enums';
 import { getShopDetails } from '@/redux/features/shopSlice';
+import { PasswordInput } from '@/components/custom/password-input';
+import AuthPlaceholder from '@/assets/authPlaceholder2.svg';
 
 const AuthPage = () => {
   const authState = useAppSelector((state) => state.auth);
@@ -83,7 +85,7 @@ const AuthPage = () => {
               <Input
                 id="username"
                 type="text"
-                placeholder="someusername"
+                placeholder="Enter username"
                 value={userName}
                 onChange={(e) => {
                   setUserName(e.target.value);
@@ -94,16 +96,16 @@ const AuthPage = () => {
             <div className="grid gap-2">
               <div className="flex items-center">
                 <Label htmlFor="password">Password</Label>
-                <a
+                {/* <a
                   href="/forgot-password"
                   className="ml-auto inline-block text-sm underline"
                 >
                   Forgot your password?
-                </a>
+                </a> */}
               </div>
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
+                placeholder="*******"
                 required
                 value={password}
                 onChange={(e) => {
@@ -120,17 +122,17 @@ const AuthPage = () => {
               </Button>
             )}
           </div>
-          <div className="mt-4 text-center text-sm">
+          {/* <div className="mt-4 text-center text-sm">
             Don&apos;t have an account?{' '}
             <a href="#" className="underline">
               Sign up
             </a>
-          </div>
+          </div> */}
         </div>
       </div>
       <div className="hidden bg-muted lg:block">
         <img
-          src="/placeholder.svg"
+          src={AuthPlaceholder}
           alt="Image"
           width="1920"
           height="1080"

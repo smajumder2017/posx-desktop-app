@@ -5,7 +5,7 @@ const fs = require('fs');
 const os = require('os');
 const { execSync } = require('child_process');
 let { noAsar } = require('process');
-noAsar =true;
+noAsar = true;
 function getEnvFile() {
   const platform = os.platform();
   return `apps/backend/env/.env.${platform}`;
@@ -14,19 +14,19 @@ function getEnvFile() {
 function getOutputPath() {
   const platform = os.platform();
   switch (platform) {
-    case "darwin": {
+    case 'darwin': {
       return path.join(
         __dirname,
         `out/posx-${process.platform}-${process.arch}/posx.app/Contents/Resources/app`,
       );
-    } 
-    case "win32": {
+    }
+    case 'win32': {
       return path.join(
         __dirname,
         `out/posx-${process.platform}-${process.arch}/resources/app`,
       );
     }
-  
+
     default:
       break;
   }
@@ -116,10 +116,10 @@ module.exports = {
       const srcNodeModules = path.join(__dirname, 'node_modules');
       const output = getOutputPath();
       const destNodeModules = path.join(output, 'node_modules');
-      
+
       fs.cpSync(srcNodeModules, destNodeModules, { recursive: true });
-      const envPath = path.join(__dirname, getEnvFile());
-      fs.copyFileSync(envPath, output + '/apps/backend/.env');
+      // const envPath = path.join(__dirname, getEnvFile());
+      // fs.copyFileSync(envPath, output + '/apps/backend/.env');
       execSync(`npm --prefix ${output} prune --production`);
     },
   },

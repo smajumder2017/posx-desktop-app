@@ -27,7 +27,7 @@ export default function Settings() {
           </p>
         </div>
         <Separator className="my-6" />
-        <div className="flex flex-1 flex-col space-y-8 overflow-auto lg:flex-row lg:space-x-12 lg:space-y-0">
+        <div className="flex flex-1 flex-col space-y-8 overflow-auto lg:flex-row lg:space-x-4 lg:space-y-0">
           <aside className="sticky top-0 lg:w-1/5">
             <SidebarNav items={sidebarNavItems(shopId)} />
           </aside>
@@ -47,12 +47,12 @@ const sidebarNavItems = (shopId: string) => [
   {
     title: 'Printers',
     icon: <IconUser size={18} />,
-    href: `/${shopId}/settings`,
+    href: `/${shopId}/restaurant/settings`,
   },
   {
     title: 'License',
     icon: <IconTool size={18} />,
-    href: `/${shopId}/settings/license`,
+    href: `/${shopId}/restaurant/settings/license`,
   },
   // {
   //   title: 'Appearance',

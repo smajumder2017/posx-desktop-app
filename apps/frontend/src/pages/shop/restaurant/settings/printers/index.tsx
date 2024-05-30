@@ -42,6 +42,7 @@ import { Badge } from '@/components/ui/badge';
 import { Message } from '@/components/custom/message';
 import { useCheckClientConnected } from '@/hooks/use-check-client-connected';
 import { IconAlertCircle } from '@tabler/icons-react';
+import { MdDeleteOutline } from 'react-icons/md';
 
 const Printers = () => {
   const clientConnected = useCheckClientConnected();
@@ -88,6 +89,11 @@ const Printers = () => {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  async function deletePrinter(id?: number) {
+    await posXDB.printers.delete(id);
+    getPrinters();
   }
 
   const getPrinterStatus = async (printers: Printer[]) => {
@@ -193,7 +199,20 @@ const Printers = () => {
                         : 'Offline'}
                     </Badge>
                   </TableCell>
-                  <TableCell>abc</TableCell>
+                  <TableCell>
+                    <Button
+                      variant={'outline'}
+                      size={'icon'}
+                      // disabled={user.userRoles?.some(
+                      //   (userRole) => userRole.role.value === 'OWNER',
+                      // )}
+                      onClick={() => {
+                        deletePrinter(printer.id);
+                      }}
+                    >
+                      <MdDeleteOutline />
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

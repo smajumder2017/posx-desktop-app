@@ -12,6 +12,10 @@ export interface IShopResponse {
   pincode: string;
   latitude: string;
   longitude: string;
+  gstinNo?: string;
+  cgstPercentage?: number;
+  sgstPercentage?: number;
+  serviceChargePercentage?: number;
   createdAt: string;
   updatedAt: string;
   shopType: ShopType;

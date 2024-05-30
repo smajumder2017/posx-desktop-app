@@ -19,6 +19,7 @@ import {
   IconSettings,
   // IconTruck,
   IconMoped,
+  IconCheck,
   // IconUserShield,
   // IconUsers,
 } from '@tabler/icons-react';
@@ -34,7 +35,11 @@ export interface SideLink extends NavLink {
   sub?: NavLink[];
 }
 
-export function sidelinks(shopId: string, shopType: string): SideLink[] {
+export function sidelinks(
+  shopId: string,
+  shopType: string,
+  // roles?: string[],
+): SideLink[] {
   if (shopType === 'restaurant') {
     return [
       {
@@ -45,22 +50,22 @@ export function sidelinks(shopId: string, shopType: string): SideLink[] {
       },
       {
         title: 'Orders',
-        label: '10',
+        label: '',
         href: '',
         icon: <IconChecklist size={18} />,
         sub: [
           {
             title: 'Takeaway',
-            label: '9',
+            label: '',
             href: `/${shopId}/${shopType}/takeaway`,
             icon: <IconMoped size={18} />,
           },
-          // {
-          //   title: 'Cargos',
-          //   label: '',
-          //   href: '/cargos',
-          //   icon: <IconBoxSeam size={18} />,
-          // },
+          {
+            title: 'Completed Orders',
+            label: '',
+            href: `/${shopId}/${shopType}/all-orders`,
+            icon: <IconCheck size={18} />,
+          },
         ],
       },
       // {

@@ -88,6 +88,9 @@ const OrderDetails: React.FC<IOrderDetailsProps> = ({ orderId, onClose }) => {
             ' ' +
             billDetails.employee?.lastName,
           orderId: orderDetails.id,
+          discount: billDetails.discount
+            ? { percentage: '0', amount: billDetails.discount }
+            : undefined,
           orderNumber: orderDetails.orderNumber,
           grandTotal: billDetails.totalAmount,
           roundOff: billDetails.roundoffDiff,
@@ -99,11 +102,18 @@ const OrderDetails: React.FC<IOrderDetailsProps> = ({ orderId, onClose }) => {
           totalQty:
             orderDetails.items?.reduce((acc, curr) => acc + curr.quantity, 0) ||
             0,
-          gst: {
-            gstNumber: billDetails.shop?.registrationNo || '',
-            amount: billDetails.gst,
-            percentage: billDetails.gst ? '5' : '0',
-          },
+          gst: billDetails.shop?.gstinNo
+            ? {
+                gstNumber: billDetails.shop.gstinNo,
+                amount: billDetails.gst,
+                percentage: billDetails.gst
+                  ? (
+                      (billDetails.shop?.cgstPercentage || 0) +
+                      (billDetails.shop?.sgstPercentage || 0)
+                    ).toString()
+                  : '0',
+              }
+            : undefined,
         });
       }
     }

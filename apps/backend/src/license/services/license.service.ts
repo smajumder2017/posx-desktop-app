@@ -4,6 +4,7 @@ import { AxiosResponse } from 'axios';
 import { License } from '@prisma/client';
 import { ApiService } from '../../api/services/api.service';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const moment = require('moment');
 
 @Injectable()

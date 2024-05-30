@@ -8,7 +8,7 @@ export default function useCheckActiveNav() {
 
     if (nav === '/' && pathArray.length < 1) return true;
 
-    return pathArray.includes(nav.replace(/^\//, '')) || pathname === nav;
+    return pathArray.includes(nav.replace(/^\//, '')) || pathname.match(nav);
   };
 
   return { checkActiveNav };

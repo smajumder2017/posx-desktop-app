@@ -7,8 +7,10 @@ import { Button } from '@/components/custom/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -20,6 +22,8 @@ interface OtpFormProps {
 }
 
 const formSchema = z.object({
+  email: z.string().email(),
+  password: z.string(),
   license: z.string().min(1, { message: 'Please enter your otp code.' }),
 });
 
@@ -29,7 +33,7 @@ export function OtpForm({ ...props }: OtpFormProps) {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { license: '' },
+    defaultValues: { license: '', email: '', password: '' },
   });
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
@@ -45,6 +49,22 @@ export function OtpForm({ ...props }: OtpFormProps) {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="grid gap-2">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Owners/Admin Email</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter e-mail" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    To activate license owner/admin's email is required
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="license"

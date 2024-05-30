@@ -10,6 +10,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       useFactory: async (configService: ConfigService) => {
         return {
           baseURL: configService.get('BASE_URL'),
+          headers: {
+            origin: 'https://posx-admin.vercel.app',
+          },
         };
       },
       inject: [ConfigService],

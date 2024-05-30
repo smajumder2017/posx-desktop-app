@@ -3,7 +3,10 @@ import { useEffect, useState } from 'react';
 import { IconRefresh, IconRefreshAlert } from '@tabler/icons-react';
 
 export const SyncStatusBar = () => {
-  const [message, setMessage] = useState<{ message: string; status: string }>();
+  const [message, setMessage] = useState<{ message: string; status: string }>({
+    message: 'not initiated',
+    status: 'SUCCESS',
+  });
   useEffect(() => {
     const eventSource = new EventSource('/api/syncStatusEvent');
     eventSource.onmessage = ({ data }) => {

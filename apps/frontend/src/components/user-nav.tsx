@@ -7,15 +7,23 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
+  // DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAppSelector } from '@/hooks/redux';
+import { useNavigate } from 'react-router-dom';
 
 export function UserNav() {
   const authState = useAppSelector((state) => state.auth);
+  const navigate = useNavigate();
+
   const userData = authState.data;
   const initials = `${userData?.firstName[0].toUpperCase()}${userData?.lastName[0].toUpperCase()}`;
+
+  const handleLogout = () => {
+    localStorage.removeItem('posxAccessToken');
+    navigate('/login');
+  };
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -41,7 +49,7 @@ export function UserNav() {
         <DropdownMenuGroup>
           <DropdownMenuItem>
             Profile
-            <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+            {/* <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut> */}
           </DropdownMenuItem>
           {/* <DropdownMenuItem>
             Billing
@@ -54,9 +62,9 @@ export function UserNav() {
           <DropdownMenuItem>New Team</DropdownMenuItem> */}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={handleLogout}>
           Log out
-          <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+          {/* <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut> */}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

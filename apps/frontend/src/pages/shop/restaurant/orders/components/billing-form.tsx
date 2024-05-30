@@ -33,16 +33,20 @@ import {
 } from '@/components/ui/table';
 import { formatPrice } from '@/utils/currency';
 import { useState } from 'react';
+import { IShopResponse } from '@/models/shop';
 
 export interface IBillingFormPayload {
   totalPrice: number;
   gst: number;
-  discount: number;
+  discount?: number;
   serviceCharges: number;
   paymentMode: string;
+  paid?: number;
+  packingCharge?: number;
 }
 interface IBillingFormProps {
   open: boolean;
+  shopDetails?: IShopResponse | null;
   onOpenChange: (value: boolean) => void;
   orderDetails?: IOrderResponse;
   customer?: ICustomer;
@@ -54,20 +58,38 @@ const BillingForm: React.FC<IBillingFormProps> = ({
   onOpenChange,
   orderDetails,
   // customer,
+  shopDetails,
   onFormSubmit,
 }) => {
   const [paymentMode, setPaymentMode] = useState('');
-  const [serviceCharge, setServiceCharge] = useState(false);
-  const [gstCharge, setGstCharge] = useState(true);
+  const [serviceCharge, setServiceCharge] = useState(
+    shopDetails?.serviceChargePercentage ? true : false,
+  );
+  const [gstCharge, setGstCharge] = useState(
+    shopDetails?.gstinNo ? true : false,
+  );
   const [packingCharge, setPackingCharge] = useState(false);
-  const [discount] = useState(0);
+  const [packingChargeAmount, setPackingChargeAmount] = useState<
+    number | undefined
+  >();
+  const [partialPayment, setPartialPayment] = useState(false);
+  const [paid, setPaid] = useState<number | undefined>();
+  const [discount, setDiscount] = useState<number | undefined>();
   const totalPrice = orderDetails?.items?.reduce((acc, curr) => {
     return acc + curr.quantity * curr.price;
   }, 0);
 
-  const gst = gstCharge && totalPrice ? (totalPrice * 5) / 100 : 0;
+  const gst =
+    gstCharge && totalPrice
+      ? (totalPrice *
+          ((shopDetails?.cgstPercentage || 1) +
+            (shopDetails?.sgstPercentage || 1))) /
+        100
+      : 0;
   const serviceChargeAmnt =
-    serviceCharge && totalPrice ? (totalPrice * 7) / 100 : 0;
+    serviceCharge && totalPrice
+      ? (totalPrice * (shopDetails?.serviceChargePercentage || 1)) / 100
+      : 0;
 
   const handleGenerateBillClick = async () => {
     onFormSubmit({
@@ -76,7 +98,19 @@ const BillingForm: React.FC<IBillingFormProps> = ({
       serviceCharges: serviceChargeAmnt,
       discount,
       paymentMode,
+      paid,
+      packingCharge: packingChargeAmount,
     });
+  };
+
+  const handlePackingChargeChange = (value: boolean) => {
+    setPackingChargeAmount(0);
+    setPackingCharge(value);
+  };
+
+  const handlePartialPaymentChange = (value: boolean) => {
+    setPaid(0);
+    setPartialPayment(value);
   };
 
   return (
@@ -99,7 +133,11 @@ const BillingForm: React.FC<IBillingFormProps> = ({
                   </div>
                 </div>
 
-                <Switch checked={gstCharge} onCheckedChange={setGstCharge} />
+                <Switch
+                  disabled={true}
+                  checked={gstCharge}
+                  onCheckedChange={setGstCharge}
+                />
               </div>
               <div className="flex flex-row items-center justify-between rounded-lg border p-2 shadow-sm col-span-1">
                 <div className="space-y-0.5">
@@ -110,6 +148,7 @@ const BillingForm: React.FC<IBillingFormProps> = ({
                 </div>
 
                 <Switch
+                  disabled={shopDetails?.serviceChargePercentage ? false : true}
                   checked={serviceCharge}
                   onCheckedChange={setServiceCharge}
                 />
@@ -124,24 +163,35 @@ const BillingForm: React.FC<IBillingFormProps> = ({
 
                 <Switch
                   checked={packingCharge}
-                  onCheckedChange={setPackingCharge}
+                  onCheckedChange={handlePackingChargeChange}
                 />
               </div>
               <div className="space-y-0.5 col-span-1">
-                <Label htmlFor="offerCode" className="text-right">
+                <Label htmlFor="packingCharge" className="text-right">
                   Packing charge amount
                 </Label>
                 <Input
                   id="packingCharges"
                   disabled={!packingCharge}
                   placeholder="Enter packing charges amount"
+                  value={packingChargeAmount || ''}
+                  onChange={(e) => {
+                    setPackingChargeAmount(parseInt(e.target.value || '0'));
+                  }}
                 />
               </div>
               <div className="space-y-0.5 col-span-1">
                 <Label htmlFor="offerCode" className="text-right">
-                  Offer code
+                  Discount
                 </Label>
-                <Input id="offerCode" placeholder="Enter offer code" />
+                <Input
+                  id="offerCode"
+                  placeholder="Enter discount"
+                  value={discount || ''}
+                  onChange={(e) => {
+                    setDiscount(parseInt(e.target.value || '0'));
+                  }}
+                />
               </div>
               <div className="space-y-0.5 col-span-1">
                 <Label>Payment method</Label>
@@ -169,8 +219,8 @@ const BillingForm: React.FC<IBillingFormProps> = ({
                 </div>
 
                 <Switch
-                  checked={false}
-                  // onCheckedChange={field.onChange}
+                  checked={partialPayment}
+                  onCheckedChange={handlePartialPaymentChange}
                 />
               </div>
               <div className="space-y-0.5 col-span-1">
@@ -179,8 +229,12 @@ const BillingForm: React.FC<IBillingFormProps> = ({
                 </Label>
                 <Input
                   id="offerCode"
-                  disabled={true}
+                  disabled={!partialPayment}
                   placeholder="Enter payment amount"
+                  value={paid || ''}
+                  onChange={(e) => {
+                    setPaid(parseInt(e.target.value || '0'));
+                  }}
                 />
               </div>
             </div>
@@ -241,7 +295,7 @@ const BillingForm: React.FC<IBillingFormProps> = ({
                       )} */}
                         </TableCell>
                         <TableCell className="text-right">
-                          {formatPrice(discount)}
+                          -{formatPrice(discount)}
                         </TableCell>
                       </TableRow>
                     ) : null}
@@ -263,7 +317,7 @@ const BillingForm: React.FC<IBillingFormProps> = ({
                         </TableCell>
                       </TableRow>
                     ) : null}
-                    {packingCharge ? (
+                    {packingChargeAmount ? (
                       <TableRow className="font-normal">
                         <TableCell>Packing charges</TableCell>
                         <TableCell className="text-center">
@@ -273,7 +327,7 @@ const BillingForm: React.FC<IBillingFormProps> = ({
                       )} */}
                         </TableCell>
                         <TableCell className="text-right">
-                          {formatPrice(0)}
+                          {formatPrice(packingChargeAmount || 0)}
                         </TableCell>
                       </TableRow>
                     ) : null}
@@ -282,7 +336,11 @@ const BillingForm: React.FC<IBillingFormProps> = ({
                       <TableCell className="text-center"></TableCell>
                       <TableCell className="text-right">
                         {formatPrice(
-                          (totalPrice || 0) + serviceChargeAmnt + gst,
+                          (totalPrice || 0) +
+                            serviceChargeAmnt +
+                            gst +
+                            (packingChargeAmount || 0) -
+                            (discount || 0),
                         )}
                       </TableCell>
                     </TableRow>

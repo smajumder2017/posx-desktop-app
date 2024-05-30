@@ -21,7 +21,7 @@ model Role {
 
 model User {
   id        String      @id @default(uuid())
-  email     String      @unique
+  email     String?     @unique
   password  String
   firstName String
   lastName  String
@@ -65,27 +65,31 @@ model UserShop {
 }
 
 model Shop {
-  id             String         @id @default(uuid())
-  shopName       String
-  shopCode       String         @unique
-  shopTypeId     Int
-  registrationNo String?        @unique
-  isActive       Boolean
-  contactNo      String
-  address        String
-  city           String
-  state          String
-  pincode        String
-  latitude       String?
-  longitude      String?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  shopType       ShopType       @relation(fields: [shopTypeId], references: [id])
-  userShop       UserShop[]
-  menuCategory   MenuCategory[]
-  menuItems      MenuItems[]
-  license        License[]
-  billing        Billing[]
+  id                      String         @id @default(uuid())
+  shopName                String
+  shopCode                String         @unique
+  shopTypeId              Int
+  registrationNo          String?        @unique
+  isActive                Boolean
+  contactNo               String
+  address                 String
+  city                    String
+  state                   String
+  pincode                 String
+  latitude                String?
+  longitude               String?
+  gstinNo                 String?
+  cgstPercentage          Int?
+  sgstPercentage          Int?
+  serviceChargePercentage Int?
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
+  shopType                ShopType       @relation(fields: [shopTypeId], references: [id])
+  userShop                UserShop[]
+  menuCategory            MenuCategory[]
+  menuItems               MenuItems[]
+  license                 License[]
+  billing                 Billing[]
 }
 
 model License {

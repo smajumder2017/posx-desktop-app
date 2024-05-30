@@ -30,7 +30,11 @@ import {
 import { Button } from '@/components/ui/button';
 import BillingForm, { IBillingFormPayload } from '../components/billing-form';
 import { posXDB } from '@/db/db';
-import { ICreateBillRequest } from '@/models/billing';
+import { IBillResponse, ICreateBillRequest } from '@/models/billing';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
+import { formatPrice } from '@/utils/currency';
 
 export default function CreateOrder() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -48,8 +52,17 @@ export default function CreateOrder() {
   const [orderDetails, setOrderDetails] = useState<IOrderResponse>();
   const [itemToDelete, setItemToDelete] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
+  const [bill, setBill] = useState<IBillResponse>();
   const [openBilling, setOpenBilling] = useState(false);
+  const [openSettel, setOpenSettel] = useState(false);
+  const [partialPayment, setPartialPayment] = useState(false);
+  const [paid, setPaid] = useState<number | undefined>();
+  const [paymentMode, setPaymentMode] = useState('');
   const navigate = useNavigate();
+
+  const ticketLength = Object.keys(ticketItems).reduce((acc, curr) => {
+    return acc + ticketItems[curr];
+  }, 0);
 
   const getCustomer = useCallback(async (id: string) => {
     setLoading(true);
@@ -83,24 +96,25 @@ export default function CreateOrder() {
     orderNumber: string;
     items: Array<{ itemName: string; quantity: number }>;
   }) => {
-    console.log(shopState.data);
     try {
       const kitchenPrinter = await posXDB.printers
         .where('printerLocation')
         .equals('kitchen')
         .toArray();
       if (shopState.data && orderDetails && kitchenPrinter.length) {
-        const payload: IPrintTicketRequest = {
-          interface: kitchenPrinter[0].printerValue,
-          shopName: shopState.data.shopName,
-          orderNumber: orderDetails.orderNumber,
-          orderItems:
-            orderDetails.items?.map((item) => ({
-              itemName: item.itemName,
-              quantity: item.quantity,
-            })) || [],
-        };
-        await apis.printTicket(payload);
+        kitchenPrinter.forEach(async (printer) => {
+          const payload: IPrintTicketRequest = {
+            interface: printer.printerValue,
+            shopName: shopState.data?.shopName || '',
+            orderNumber: orderDetails.orderNumber,
+            orderItems:
+              orderDetails.items?.map((item) => ({
+                itemName: item.itemName,
+                quantity: item.quantity,
+              })) || [],
+          };
+          await apis.printTicket(payload);
+        });
       }
     } catch (error) {
       console.log(error);
@@ -154,7 +168,7 @@ export default function CreateOrder() {
     }
     setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [menu.length, Object.keys(ticketItems).length, orderId]);
+  }, [menu.length, ticketLength, orderId]);
 
   const getOrderDetails = useCallback(async (orderId: string) => {
     try {
@@ -167,6 +181,15 @@ export default function CreateOrder() {
       console.log(error);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const getBillDetails = useCallback(async (orderId: string) => {
+    try {
+      const billResponse = await apis.getActiveBill(orderId);
+      setBill(billResponse.data);
+    } catch (error) {
+      console.log(error);
+    }
   }, []);
 
   const handleItemDeleteClick = (itemId: string) => {
@@ -219,14 +242,14 @@ export default function CreateOrder() {
           customerId: customer.id,
           employeeId: employee.id,
           gst: payload.gst,
-          discount: payload.discount,
+          discount: payload.discount || 0,
           orderId: orderDetails.id,
           serviceCharges: payload.serviceCharges,
           shopId: orderDetails.shopId,
         };
         const billResponse = await apis.createBill(billPayload);
         await apis.capturePayment({
-          amountRecieved: billResponse.data.totalAmount,
+          amountRecieved: payload.paid || billResponse.data.totalAmount,
           billId: billResponse.data.id,
           paymentMode: payload.paymentMode,
         });
@@ -239,6 +262,9 @@ export default function CreateOrder() {
           await apis.printBill({
             interface: billingPrinter[0].printerValue,
             amount: billResponse.data.amount,
+            discount: billResponse.data.discount
+              ? { percentage: '0', amount: billResponse.data.discount }
+              : undefined,
             customerName: customer.name,
             employeeName: employee.firstName + ' ' + employee.lastName,
             orderId: orderDetails.id,
@@ -255,28 +281,59 @@ export default function CreateOrder() {
                 (acc, curr) => acc + curr.quantity,
                 0,
               ) || 0,
-            gst: {
-              gstNumber: shopDetails.registrationNo,
-              amount: payload.gst,
-              percentage: payload.gst ? '5' : '0',
-            },
+            gst: shopDetails.gstinNo
+              ? {
+                  gstNumber: shopDetails.gstinNo,
+                  amount: payload.gst,
+                  percentage: payload.gst
+                    ? (
+                        (shopDetails?.cgstPercentage || 0) +
+                        (shopDetails?.sgstPercentage || 0)
+                      ).toString()
+                    : '0',
+                }
+              : undefined,
           });
         }
+        setOpenBilling(false);
         await getOrderDetails(orderDetails.id);
+        await getBillDetails(orderDetails.id);
       }
     } catch (error) {
       console.log(error);
     }
   };
 
+  const handleSettelClick = async () => {
+    if (bill && orderDetails) {
+      await apis.capturePayment({
+        amountRecieved: paid || pendingAmount,
+        billId: bill.id,
+        paymentMode: paymentMode,
+      });
+      await getOrderDetails(orderDetails.id);
+      await getBillDetails(orderDetails.id);
+    }
+  };
+
   useEffect(() => {
-    if (orderId) getOrderDetails(orderId);
-  }, [orderId, getOrderDetails]);
+    if (orderId) {
+      getOrderDetails(orderId);
+      getBillDetails(orderId);
+    }
+  }, [orderId, getOrderDetails, getBillDetails]);
 
   useEffect(() => {
     if (shopId) getMenuByShop(shopId);
     if (customerId) getCustomer(customerId);
   }, [customerId, getCustomer, shopId, getMenuByShop]);
+
+  const totalBillAmount = bill?.totalAmount || 0;
+  const paidAmount =
+    bill?.payments?.reduce((acc, curr) => {
+      return acc + curr.amountRecieved;
+    }, 0) || 0;
+  const pendingAmount = totalBillAmount - paidAmount;
 
   return (
     <div className="max-h-full flex flex-col flex-grow">
@@ -317,6 +374,8 @@ export default function CreateOrder() {
               onQtyChange={onMenuItemClick}
               menuItems={menu.flatMap((category) => category.menuItems)}
               ticketItems={ticketItems}
+              bill={bill}
+              onSettelClick={() => setOpenSettel(true)}
               onCreateNewOrder={handleCreateNewOrder}
               onPrintTicket={handlePrintTicket}
               orderDetails={orderDetails}
@@ -374,10 +433,78 @@ export default function CreateOrder() {
       <BillingForm
         open={openBilling}
         onOpenChange={setOpenBilling}
+        shopDetails={shopState.data}
         orderDetails={orderDetails}
         customer={customer}
         onFormSubmit={handleGenerateBillClick}
       />
+      <AlertDialog open={openSettel} onOpenChange={setOpenSettel}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Settel Pending Amount</AlertDialogTitle>
+            <AlertDialogDescription>
+              Setteling the amount will close the order
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-0.5 col-span-1">
+            <Label>Payment method</Label>
+            <Select onValueChange={setPaymentMode} value={paymentMode}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a payment method" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Payment methods</SelectLabel>
+                  <SelectItem value="CreditCard">Credit Card</SelectItem>
+                  <SelectItem value="DebitCard">Debit Card</SelectItem>
+                  <SelectItem value="Cash">Cash</SelectItem>
+                  <SelectItem value="UPI">UPI</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm col-span-1">
+            <div className="space-y-0.5">
+              <Label>Partial payment</Label>
+              <div className="text-sm font-light">
+                Check this to capture partial payment
+              </div>
+            </div>
+
+            <Switch
+              checked={partialPayment}
+              onCheckedChange={setPartialPayment}
+            />
+          </div>
+          <div className="space-y-0.5 col-span-1">
+            <Label htmlFor="offerCode" className="text-right">
+              Payment amount
+            </Label>
+            <Input
+              disabled={!partialPayment}
+              placeholder="Enter payment amount"
+              type="number"
+              value={paid || ''}
+              onChange={(e) => {
+                setPaid(parseInt(e.target.value || '0'));
+              }}
+            />
+          </div>
+          <AlertDialogFooter>
+            <Button
+              variant={'secondary'}
+              onClick={() => {
+                setOpenSettel(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleSettelClick} disabled={!paymentMode}>
+              Settel {formatPrice(paid || pendingAmount)}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

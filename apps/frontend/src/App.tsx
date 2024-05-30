@@ -13,6 +13,7 @@ import AuthWrapper from './components/wappers/auth-wrapper';
 import LicenseWrapper from './components/wappers/license-wrapper';
 import License from './pages/license';
 import CreateOrder from './pages/shop/restaurant/orders/create';
+import OrderHistory from './pages/shop/restaurant/orders/history';
 import Printers from './pages/shop/restaurant/settings/printers';
 import Settings from './pages/shop/restaurant/settings';
 
@@ -66,12 +67,20 @@ const router = createBrowserRouter([
         element: <CreateOrder />,
       },
       {
+        path: 'all-orders',
+        element: <OrderHistory />,
+      },
+      {
         path: 'settings',
         element: <Settings />,
         children: [
           {
             index: true,
             element: <Printers />,
+          },
+          {
+            path: 'license',
+            element: <License />,
           },
         ],
       },

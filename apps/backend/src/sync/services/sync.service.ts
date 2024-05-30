@@ -28,11 +28,16 @@ export class SyncService {
           where: { userRoles: { some: { role: { value: 'OWNER' } } } },
           include: { userRoles: { include: { role: true } } },
         });
-        await this.apiService.getShopToken(user.id, licenseRes.license.number);
-        syncEvent.shopId = licenseRes.license.shopId;
-        syncEvent.licenseNumber = licenseRes.license.number;
-        this.eventService.emit('syncDownData', syncEvent);
-        this.eventService.emit('syncUpData', syncEvent);
+        if (user) {
+          await this.apiService.getShopToken(
+            user.id,
+            licenseRes.license.number,
+          );
+          syncEvent.shopId = licenseRes.license.shopId;
+          syncEvent.licenseNumber = licenseRes.license.number;
+          this.eventService.emit('syncDownData', syncEvent);
+          this.eventService.emit('syncUpData', syncEvent);
+        }
       }
     } catch (error) {
       this.logger.error(error, error.stack);

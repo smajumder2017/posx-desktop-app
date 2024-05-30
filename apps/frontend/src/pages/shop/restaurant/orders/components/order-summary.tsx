@@ -40,12 +40,15 @@ import {
 } from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
 import { IShopResponse } from '@/models/shop';
+import { IBillResponse } from '@/models/billing';
 
 interface IOrderSummary {
   ticketItems: { [key: string]: number };
   menuItems: MenuItemsEntity[];
   orderDetails?: IOrderResponse;
   shopDetails?: IShopResponse | null;
+  bill?: IBillResponse;
+  onSettelClick?: () => void;
   onQtyChange: (id: string, counter?: number) => void;
   onCreateNewOrder: () => Promise<void>;
   onPrintTicket: (orderDetails: {
@@ -58,6 +61,7 @@ interface IOrderSummary {
 const OrderSummary: React.FC<IOrderSummary> = ({
   ticketItems,
   menuItems,
+  bill,
   onQtyChange,
   orderDetails,
   onCreateNewOrder,
@@ -65,6 +69,7 @@ const OrderSummary: React.FC<IOrderSummary> = ({
   onPrintTicket,
   onItemDelete,
   onBillingClick,
+  onSettelClick,
 }) => {
   const navigate = useNavigate();
   const [tab, setTab] = useState<string>(
@@ -276,10 +281,18 @@ const OrderSummary: React.FC<IOrderSummary> = ({
             <Button className="col-span-1" onClick={onBillingClick}>
               Generate Bill
             </Button>
-
+            {bill && !bill.isSetteled && (
+              <Button
+                variant={'outline'}
+                className="col-span-1"
+                onClick={onSettelClick}
+              >
+                Settel Order
+              </Button>
+            )}
             <Button
               variant={'secondary'}
-              className="col-span-2"
+              className={!bill ? 'col-span-2' : 'col-span-1'}
               onClick={() => setCancelAlert(true)}
             >
               Cancel Order

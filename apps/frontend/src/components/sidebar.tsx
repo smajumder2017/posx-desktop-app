@@ -83,15 +83,15 @@ export default function Sidebar2({
                   strokeLinejoin="round"
                   strokeWidth="16"
                 ></line>
-                <span className="sr-only">Website Name</span>
+                <span className="sr-only">PosX</span>
               </svg>
               <div
                 className={`flex flex-col justify-end truncate ${
                   isCollapsed ? 'invisible w-0' : 'visible w-auto'
                 }`}
               >
-                <span className="font-medium">Shadcn Admin</span>
-                <span className="text-xs">Vite + ShadcnUI</span>
+                <span className="font-medium">{shopState.data.shopName}</span>
+                <span className="text-xs">Powered by PosX</span>
               </div>
             </div>
 

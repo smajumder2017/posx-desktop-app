@@ -1,4 +1,11 @@
-import { Card } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 // import { Link } from 'react-router-dom';
 import { OtpForm } from './otp-form';
 import * as apis from '../../apis';
@@ -6,6 +13,10 @@ import { useCallback, useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { getValidLicense } from '@/redux/features/licenseSlice';
+import { Label } from '@/components/ui/label';
+import { prettyDate } from '@/utils/date';
+import { Button } from '@/components/ui/button';
+import { EyeClosedIcon } from '@radix-ui/react-icons';
 // import { RequestStatus } from '@/utils/enums';
 
 const splitNumberInChunks = (
@@ -24,6 +35,7 @@ const splitNumberInChunks = (
 
 export default function License() {
   const licenseState = useAppSelector((state) => state.license);
+  const authState = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
   // const [loader, setLoader] = useState(false);
   const location = useLocation();
@@ -55,11 +67,74 @@ export default function License() {
 
   const validLicense = licenseState.data?.id;
 
-  // if (licenseState.asyncStatus === RequestStatus.Failed) {
-  //   return <Navigate to={`/license`} state={{ from: location }} replace />;
-  // }
+  function mask(data: string, charsToMask?: number) {
+    return data.split('').map((char, index) => {
+      if (index <= (charsToMask || data.length - 1)) {
+        return '*';
+      }
+      return char;
+    });
+  }
 
-  if (validLicense) {
+  const havePermission =
+    authState.data?.userRoles?.some((userRole) =>
+      ['ADMIN', 'OWNER'].includes(userRole.role.value),
+    ) || false;
+
+  if (
+    validLicense &&
+    authState.data &&
+    window.location.pathname.includes('settings/license')
+  ) {
+    return (
+      <Card>
+        <CardHeader className="px-7">
+          <CardTitle>License</CardTitle>
+          <CardDescription>Manage shop license here</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          {licenseState.data?.number && (
+            <div>
+              <Label>License Number</Label>
+              <div className="text-sm flex gap-2 items-center">
+                <span>{mask(licenseState.data.number, 14)}</span>
+                {havePermission && (
+                  <span>
+                    <Button size="icon" variant="outline">
+                      <EyeClosedIcon fontSize={'12px'} />
+                    </Button>
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+          {licenseState.data?.startDate && (
+            <div>
+              <Label>Valid From</Label>
+              <div className="text-sm">
+                {prettyDate(new Date(licenseState.data.startDate))}
+              </div>
+            </div>
+          )}
+          {licenseState.data?.endDate && (
+            <div>
+              <Label>Valid Upto</Label>
+              <div className="text-sm">
+                {prettyDate(new Date(licenseState.data.endDate))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+        <CardFooter>
+          <Button variant={'destructive'} disabled={!havePermission}>
+            Detach License
+          </Button>
+        </CardFooter>
+      </Card>
+    );
+  }
+
+  if (validLicense && window.location.pathname === 'license') {
     return <Navigate to={`/`} state={{ from: location }} replace />;
   }
 

@@ -11,6 +11,7 @@ export interface ICreateBillRequest {
   discount: number;
   gst: number;
   serviceCharges: number;
+  packingCharges?: number;
 }
 
 export interface IBillResponse {

@@ -136,6 +136,16 @@ export class PrinterService {
       ]);
     }
     this.printer.drawLine('-');
+    if (payload.discount) {
+      this.printer.tableCustom([
+        { text: 'Discount', width: 0.75, align: 'RIGHT' },
+        {
+          text: payload.discount.amount.toString(),
+          align: 'RIGHT',
+          width: 0.25,
+        },
+      ]);
+    }
     this.printer.tableCustom([
       { text: 'Round off', width: 0.75, align: 'RIGHT' },
       { text: payload.roundOff.toString(), align: 'RIGHT', width: 0.25 },
