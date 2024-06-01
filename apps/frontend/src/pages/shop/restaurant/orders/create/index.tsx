@@ -248,11 +248,13 @@ export default function CreateOrder() {
           shopId: orderDetails.shopId,
         };
         const billResponse = await apis.createBill(billPayload);
-        await apis.capturePayment({
-          amountRecieved: payload.paid || billResponse.data.totalAmount,
-          billId: billResponse.data.id,
-          paymentMode: payload.paymentMode,
-        });
+        if (payload.paymentMode) {
+          await apis.capturePayment({
+            amountRecieved: payload.paid || billResponse.data.totalAmount,
+            billId: billResponse.data.id,
+            paymentMode: payload.paymentMode,
+          });
+        }
 
         const billingPrinter = await posXDB.printers
           .where('printerLocation')

@@ -1,8 +1,9 @@
-import { Controller, Get, Sse } from '@nestjs/common';
+import { Controller, Get, Param, Sse } from '@nestjs/common';
 import { AppService } from './app.service';
 import { PrismaService } from './infra/database/services/prisma.service';
 import { EventsService } from './event.service';
 import { map } from 'rxjs';
+import { ApiService } from './api/services/api.service';
 
 @Controller()
 export class AppController {
@@ -10,6 +11,7 @@ export class AppController {
     private readonly appService: AppService,
     private readonly prismaService: PrismaService,
     private readonly eventService: EventsService,
+    private readonly apiService: ApiService,
   ) {}
 
   @Get()
@@ -37,5 +39,10 @@ export class AppController {
         return { data };
       }),
     );
+  }
+
+  @Get('dashboard/sales/:shopId')
+  getSales(@Param('shopId') shopId: string) {
+    return this.apiService.getSalesData(shopId);
   }
 }

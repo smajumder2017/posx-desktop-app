@@ -298,4 +298,21 @@ export class ApiService {
       }),
     );
   }
+
+  async getSalesData(shopId: string) {
+    try {
+      const res = await lastValueFrom(
+        this.httpService.get<any>(`dashboard/sales/${shopId}`, {
+          headers: {
+            Authorization: `bearer ${this.token}`,
+          },
+        }),
+      );
+      return res.data;
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+      return Promise.reject(error);
+    }
+  }
 }

@@ -138,19 +138,19 @@ const Printers = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className={`flex gap-4 ${clientConnected ? 'justify-end' : ''}`}>
-        {!clientConnected && (
-          <div className="flex-1">
-            <Message
-              subHeading="No printer client found, you can only add network printers now."
-              icon={<IconAlertCircle />}
-            />
-          </div>
-        )}
-        <Button onClick={() => setOpenAddPrinter(true)}>Add printer</Button>
-      </div>
       <Card>
         <CardHeader className="px-7">
+          <div className={`flex gap-4 ${clientConnected ? 'justify-end' : ''}`}>
+            {!clientConnected && (
+              <div className="flex-1">
+                <Message
+                  subHeading="No printer client found, you can only add network printers now."
+                  icon={<IconAlertCircle />}
+                />
+              </div>
+            )}
+            <Button onClick={() => setOpenAddPrinter(true)}>Add printer</Button>
+          </div>
           <CardTitle>Printers</CardTitle>
           <CardDescription>
             List of configured printers on this machine

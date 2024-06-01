@@ -40,6 +40,7 @@ export class SyncService {
         }
       }
     } catch (error) {
+      console.log(error);
       this.logger.error(error, error.stack);
     }
   }

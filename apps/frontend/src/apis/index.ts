@@ -24,6 +24,8 @@ import {
   ICreatePaymentResponse,
 } from '@/models/billing';
 
+import { ISalesResponse } from '@/models/dashboard';
+
 const serverUrl = '/api';
 
 // Add a request interceptor
@@ -150,3 +152,6 @@ export const getPrinterStatus = (apiArgs: { type: string; value: string }) =>
       params: apiArgs,
     },
   );
+
+export const getSalesData = (shopId: string) =>
+  axios.get<ISalesResponse>(`${serverUrl}/dashboard/sales/${shopId}`);

@@ -351,9 +351,7 @@ const BillingForm: React.FC<IBillingFormProps> = ({
           </div>
         </div>
         <DrawerFooter className="flex flex-row justify-end">
-          <Button disabled={!paymentMode} onClick={handleGenerateBillClick}>
-            Generate Bill
-          </Button>
+          <Button onClick={handleGenerateBillClick}>Generate Bill</Button>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
