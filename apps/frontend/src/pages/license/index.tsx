@@ -10,7 +10,7 @@ import {
 import { OtpForm } from './otp-form';
 import * as apis from '../../apis';
 import { useCallback, useEffect } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { getValidLicense } from '@/redux/features/licenseSlice';
 import { Label } from '@/components/ui/label';
@@ -37,7 +37,7 @@ export default function License() {
   const licenseState = useAppSelector((state) => state.license);
   const authState = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
-  // const [loader, setLoader] = useState(false);
+  const navigate = useNavigate();
   const location = useLocation();
 
   const fetchLicenses = useCallback(
@@ -46,20 +46,28 @@ export default function License() {
     [],
   );
 
-  const validateLicense = useCallback(async (number: string) => {
-    try {
-      const code = splitNumberInChunks(number, 4, '-');
+  const validateLicense = useCallback(
+    async (email: string, password: string, number: string) => {
+      try {
+        const code = splitNumberInChunks(number, 4, '-');
 
-      const license = await apis.validateLicense({ number: code });
-      console.log(license);
-      if (license.data.valid) {
-        localStorage.setItem('shopId', license.data.license.shopId);
+        const license = await apis.validateLicense({
+          email,
+          password,
+          number: code,
+        });
+        console.log(license);
+        if (license.data.valid) {
+          localStorage.setItem('shopId', license.data.license.shopId);
+          navigate('/login');
+        }
+        console.log(license);
+      } catch (error) {
+        console.log(error);
       }
-      console.log(license);
-    } catch (error) {
-      console.log(error);
-    }
-  }, []);
+    },
+    [],
+  );
 
   useEffect(() => {
     fetchLicenses();

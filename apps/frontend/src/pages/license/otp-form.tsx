@@ -7,7 +7,7 @@ import { Button } from '@/components/custom/button';
 import {
   Form,
   FormControl,
-  FormDescription,
+  // FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -18,7 +18,11 @@ import { PinInput, PinInputField } from '@/components/custom/pin-input';
 import { Separator } from '@/components/ui/separator';
 
 interface OtpFormProps {
-  handleSubmit: (number: string) => Promise<void>;
+  handleSubmit: (
+    email: string,
+    password: string,
+    number: string,
+  ) => Promise<void>;
 }
 
 const formSchema = z.object({
@@ -39,7 +43,7 @@ export function OtpForm({ ...props }: OtpFormProps) {
   async function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true);
     console.log({ data });
-    await props.handleSubmit(data.license);
+    await props.handleSubmit(data.email, data.password, data.license);
     form.reset();
     setIsLoading(false);
   }
@@ -58,9 +62,25 @@ export function OtpForm({ ...props }: OtpFormProps) {
                   <FormControl>
                     <Input placeholder="Enter e-mail" {...field} />
                   </FormControl>
-                  <FormDescription>
+                  {/* <FormDescription>
                     To activate license owner/admin's email is required
-                  </FormDescription>
+                  </FormDescription> */}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter password" {...field} />
+                  </FormControl>
+                  {/* <FormDescription>
+                    To activate license owner/admin's email is required
+                  </FormDescription> */}
                   <FormMessage />
                 </FormItem>
               )}
@@ -71,6 +91,7 @@ export function OtpForm({ ...props }: OtpFormProps) {
               render={({ field }) => (
                 <FormItem className="space-y-1">
                   <FormControl>
+                    <FormLabel>License Number</FormLabel>
                     <PinInput
                       {...field}
                       className="flex h-10 justify-between"

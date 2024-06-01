@@ -70,7 +70,11 @@ export const getActiveLicenses = () =>
     `${serverUrl}/license`,
   );
 
-export const validateLicense = (apiArgs: { number: string }) =>
+export const validateLicense = (apiArgs: {
+  email: string;
+  password: string;
+  number: string;
+}) =>
   axios.post<{ license: ILicenseResponse; valid: boolean }>(
     `${serverUrl}/license/validate`,
     apiArgs,

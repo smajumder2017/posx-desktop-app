@@ -13,7 +13,7 @@ function getDBPath() {
     }
 
     case 'linux': {
-      return path.join(app.getPath('appData'), '/posx', 'data', 'posx.db');
+      return path.join(app.getPath('appData'), '.posx', 'data', 'posx.db');
     }
 
     default:

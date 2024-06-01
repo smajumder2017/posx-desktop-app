@@ -9,7 +9,7 @@ import { prisma, runPrismaCommand } from './prisma';
 import log from 'electron-log/main';
 const isDev = !app.isPackaged;
 
-if (require("electron-squirrel-startup")) {
+if (require('electron-squirrel-startup')) {
   app.quit();
 }
 
@@ -34,6 +34,10 @@ const createWindow = async () => {
         needsMigration = true;
         // prisma for whatever reason has trouble if the database file does not exist yet.
         // So just touch it here
+        const dataFolderPath = dbPath.replace('/posx.db', '');
+        if (!fs.existsSync(dataFolderPath)) {
+          fs.mkdirSync(dataFolderPath);
+        }
         fs.closeSync(fs.openSync(dbPath, 'w'));
       } else {
         try {
