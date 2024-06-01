@@ -9,6 +9,10 @@ import { prisma, runPrismaCommand } from './prisma';
 import log from 'electron-log/main';
 const isDev = !app.isPackaged;
 
+if (require("electron-squirrel-startup")) {
+  app.quit();
+}
+
 log.initialize();
 
 if (isDev) {
