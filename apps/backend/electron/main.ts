@@ -34,7 +34,9 @@ const createWindow = async () => {
         needsMigration = true;
         // prisma for whatever reason has trouble if the database file does not exist yet.
         // So just touch it here
-        const dataFolderPath = dbPath.replace('/posx.db', '');
+        // const dataFolderPath = dbPath.replace('/posx.db', '');
+        let dataFolderPath = dbPath;
+        dataFolderPath = dataFolderPath.replace('posx.db', '');
         if (!fs.existsSync(dataFolderPath)) {
           fs.mkdirSync(dataFolderPath);
         }
@@ -105,9 +107,11 @@ const createWindow = async () => {
     const win = new BrowserWindow({
       width: 800,
       height: 600,
+      autoHideMenuBar: true,
     });
     await bootstrap();
-    win.loadFile('./electron/index.html');
+    console.log(__dirname)
+    win.loadFile(path.join(__dirname, "..", 'public/index.html'));
     shell.openExternal(`http://localhost:${isDev ? 5173 : 8080}`);
     log.info(app.getAppPath());
     // }
