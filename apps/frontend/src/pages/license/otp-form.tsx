@@ -7,7 +7,7 @@ import { Button } from '@/components/custom/button';
 import {
   Form,
   FormControl,
-  // FormDescription,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -51,84 +51,85 @@ export function OtpForm({ ...props }: OtpFormProps) {
   return (
     <div className={cn('grid gap-6')} {...props}>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className="grid gap-2">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Owners/Admin Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter e-mail" {...field} />
-                  </FormControl>
-                  {/* <FormDescription>
-                    To activate license owner/admin's email is required
-                  </FormDescription> */}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter password" {...field} />
-                  </FormControl>
-                  {/* <FormDescription>
-                    To activate license owner/admin's email is required
-                  </FormDescription> */}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="license"
-              render={({ field }) => (
-                <FormItem className="space-y-1">
-                  <FormControl>
-                    <FormLabel>License Number</FormLabel>
-                    <PinInput
-                      {...field}
-                      className="flex h-10 justify-between"
-                      onComplete={() => setDisabledBtn(false)}
-                      onIncomplete={() => setDisabledBtn(true)}
-                    >
-                      {Array.from({ length: 19 }, (_, i) => {
-                        if ([4, 9, 14].includes(i))
-                          return (
-                            <Separator
-                              key={i}
-                              orientation="vertical"
-                              className="ml-1 mr-1"
-                            />
-                          );
+        <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-2">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Owners/Admin Email</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter e-mail" {...field} />
+                </FormControl>
+                <FormDescription>
+                  To activate license owner/admin's email is required
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter password" {...field} />
+                </FormControl>
+                <FormDescription>
+                  Enter password of the Owner/Admin
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="license"
+            render={({ field }) => (
+              <FormItem className="space-y-1">
+                <FormLabel>License Number</FormLabel>
+                <FormControl>
+                  <PinInput
+                    {...field}
+                    className="flex h-10 justify-between"
+                    onComplete={() => setDisabledBtn(false)}
+                    onIncomplete={() => setDisabledBtn(true)}
+                  >
+                    {Array.from({ length: 19 }, (_, i) => {
+                      if ([4, 9, 14].includes(i))
                         return (
-                          <PinInputField
+                          <Separator
                             key={i}
-                            component={Input}
-                            className={`ml-1 mr-1 ${
-                              form.getFieldState('license').invalid
-                                ? 'border-red-500'
-                                : ''
-                            }`}
+                            orientation="vertical"
+                            className="ml-1 mr-1"
                           />
                         );
-                      })}
-                    </PinInput>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button className="mt-2" disabled={disabledBtn} loading={isLoading}>
-              Verify
-            </Button>
-          </div>
+                      return (
+                        <PinInputField
+                          key={i}
+                          component={Input}
+                          className={`ml-1 mr-1 ${
+                            form.getFieldState('license').invalid
+                              ? 'border-red-500'
+                              : ''
+                          }`}
+                        />
+                      );
+                    })}
+                  </PinInput>
+                </FormControl>
+                <FormDescription>
+                  Enter the license number that you recieved in email.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button className="mt-2" disabled={disabledBtn} loading={isLoading}>
+            Verify
+          </Button>
         </form>
       </Form>
     </div>

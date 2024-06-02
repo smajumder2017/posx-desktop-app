@@ -15,7 +15,7 @@ import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { getValidLicense } from '@/redux/features/licenseSlice';
 import { Label } from '@/components/ui/label';
 import { prettyDate } from '@/utils/date';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/custom/button';
 import { EyeClosedIcon } from '@radix-ui/react-icons';
 // import { RequestStatus } from '@/utils/enums';
 
@@ -147,36 +147,35 @@ export default function License() {
   }
 
   return (
-    <>
-      <div className="container grid h-svh flex-col items-center justify-center bg-primary-foreground lg:max-w-none lg:px-0">
-        <div className="mx-auto flex w-full flex-col justify-center space-y-2 lg:p-8">
-          <div className="mb-4 flex items-center justify-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="mr-2 h-6 w-6"
-            >
-              <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
-            </svg>
-            <h1 className="text-xl font-medium">PosX</h1>
+    <div className="container grid h-svh flex-col items-center justify-center bg-primary-foreground lg:max-w-none lg:px-0">
+      <div className="mx-auto flex w-full flex-col justify-center space-y-2 lg:p-8">
+        <div className="mb-4 flex items-center justify-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="mr-2 h-6 w-6"
+          >
+            <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
+          </svg>
+          <h1 className="text-xl font-medium">PosX</h1>
+        </div>
+        <Card className="mx-auto p-6">
+          <div className="mb-2 flex flex-col space-y-2 text-left">
+            <h1 className="text-md font-semibold tracking-tight">
+              License validation
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Please enter the license code. <br /> We have sent the license
+              code to owners email.
+            </p>
           </div>
-          <Card className="mx-auto p-6">
-            <div className="mb-2 flex flex-col space-y-2 text-left">
-              <h1 className="text-md font-semibold tracking-tight">
-                License validation
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Please enter the license code. <br /> We have sent the license
-                code to owners email.
-              </p>
-            </div>
-            <OtpForm handleSubmit={validateLicense} />
-            {/* <p className="mt-4 px-8 text-center text-sm text-muted-foreground">
+          <OtpForm handleSubmit={validateLicense} />
+          {/* <p className="mt-4 px-8 text-center text-sm text-muted-foreground">
               Haven't received it?{' '}
               <Link
                 to="/resent-new-code"
@@ -186,9 +185,8 @@ export default function License() {
               </Link>
               .
             </p> */}
-          </Card>
-        </div>
+        </Card>
       </div>
-    </>
+    </div>
   );
 }
