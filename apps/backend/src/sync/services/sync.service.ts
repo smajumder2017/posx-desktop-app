@@ -3,7 +3,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { ApiService } from '../../api/services/api.service';
 import { PrismaService } from '../../infra/database/services/prisma.service';
 import { SyncMetaDataEvent } from '../events/syncMetaData';
-import { Cron } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { LicenseService } from '../../license/services/license.service';
 import { EventsService } from '../../event.service';
 
@@ -17,8 +17,9 @@ export class SyncService {
     private readonly eventService: EventsService,
   ) {}
 
-  @Cron('0 */2 * * * *')
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async syncTask() {
+    console.log('Sync cron ran');
     try {
       const activeLicenses = await this.licenseService.getActiveLicense();
       if (activeLicenses.length) {
@@ -272,12 +273,16 @@ export class SyncService {
   }
 
   private async syncUserRoles() {
+    this.logger.log('Sync Process: [SCHEMA: UserRole]: Starting sync');
+    const userRoles = await this.prismaService.userRoles.findMany({
+      orderBy: { updatedAt: 'asc' },
+    });
+    this.logger.log(
+      `Sync Process: [SCHEMA: UserRole]: existing roles : ${userRoles.length}`,
+    );
+    const lastSyncTime = userRoles[0]?.updatedAt;
     const users = await this.prismaService.user.findMany();
     for (const user of users) {
-      const userRoles = await this.prismaService.userRoles.findMany({
-        orderBy: { updatedAt: 'asc' },
-      });
-      const lastSyncTime = userRoles[0]?.updatedAt;
       let hasNext = true;
       const take = 100;
       let skip = 0;
@@ -290,7 +295,14 @@ export class SyncService {
         });
         skip = skip + take;
         hasNext = userRoleRes.data.hasNext;
+        this.logger.log(
+          'Sync Process: [SCHEMA: UserRole]: Update found: ' +
+            userRoleRes.data.userRoles.length,
+        );
         for (const userRole of userRoleRes.data.userRoles) {
+          this.logger.log(
+            'Sync Process: [SCHEMA: UserRole]: syncing: ' + userRole.id,
+          );
           await this.prismaService.userRoles.upsert({
             where: { id: userRole.id },
             create: userRole,

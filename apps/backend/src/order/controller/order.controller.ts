@@ -21,10 +21,18 @@ import {
 import { OrderService } from '../services/order.service';
 import { Prisma } from '@prisma/client';
 import { ApiResponse } from '@nestjs/swagger';
+import { ApiService } from 'src/api/services/api.service';
+import { GetUser } from 'src/auth/decorators/user.decorator';
+import { JwtPayload } from 'src/auth/interfaces';
+import { LicenseService } from 'src/license/services/license.service';
 
 @Controller('order')
 export class OrderController {
-  constructor(private readonly orderService: OrderService) {}
+  constructor(
+    private readonly orderService: OrderService,
+    private readonly apiService: ApiService,
+    private readonly licenseService: LicenseService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Post()
@@ -41,6 +49,7 @@ export class OrderController {
       orderStatusId: 1,
       items: orderItems,
     });
+    return;
   }
 
   @UseGuards(JwtAuthGuard)
@@ -113,9 +122,53 @@ export class OrderController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('/synced')
+  async getSyncedOrders(
+    @GetUser() user: JwtPayload,
+    @Query('shopId') shopId: string,
+    @Query('orderStatusId') orderStatusId?: string,
+    @Query('isClosed') isClosed?: string,
+    @Query('employeeId') employeeId?: string,
+    @Query('skip') skip: string = '0',
+    @Query('take') take: string = '100',
+  ) {
+    const licenses = await this.licenseService.getActiveLicense();
+    const shopLicense = licenses.find((license) => license.license.shopId);
+    const response = await this.apiService.getShopToken(
+      user.id,
+      shopLicense.license.number,
+    );
+    this.apiService.setToken(response.data.accessToken);
+    return this.apiService.getAllOrder({
+      shopId,
+      orderStatusId,
+      isClosed,
+      employeeId,
+      skip,
+      take,
+    });
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get(':orderId')
   async getOrderById(@Param('orderId') orderId: string) {
     return this.orderService.findOrderById(orderId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':orderId/synced')
+  async getSyncedOrderById(
+    @Param('orderId') orderId: string,
+    @GetUser() user: JwtPayload,
+  ) {
+    const licenses = await this.licenseService.getActiveLicense();
+    const shopLicense = licenses.find((license) => license.license.shopId);
+    const response = await this.apiService.getShopToken(
+      user.id,
+      shopLicense.license.number,
+    );
+    this.apiService.setToken(response.data.accessToken);
+    return this.apiService.getOrderDetails(orderId);
   }
 
   @ApiResponse({

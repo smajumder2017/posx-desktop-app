@@ -47,7 +47,7 @@ const OrderDetails: React.FC<IOrderDetailsProps> = ({ orderId, onClose }) => {
 
   const getOrderDetails = useCallback(async (orderId: string) => {
     try {
-      const orderDetailsResponse = await apis.getOrderById(orderId);
+      const orderDetailsResponse = await apis.getSyncedOrderById(orderId);
       setOrderDetails(orderDetailsResponse.data);
     } catch (error) {
       console.log(error);
@@ -57,7 +57,7 @@ const OrderDetails: React.FC<IOrderDetailsProps> = ({ orderId, onClose }) => {
 
   const getBillDetails = useCallback(async (orderId: string) => {
     try {
-      const orderDetailsResponse = await apis.getActiveBill(orderId);
+      const orderDetailsResponse = await apis.getSyncedActiveBill(orderId);
       setBillDetails(orderDetailsResponse.data);
     } catch (error) {
       console.log(error);
@@ -334,22 +334,26 @@ const OrderDetails: React.FC<IOrderDetailsProps> = ({ orderId, onClose }) => {
           {billDetails?.payments?.length ? (
             <Separator className="my-4" />
           ) : null}
-          {billDetails?.payments?.map((payment) => {
-            return (
-              <div className="grid gap-3" key={payment.id}>
-                <div className="font-semibold">Payment Information</div>
-                <dl className="grid gap-3 text-xs 2xl:text-sm">
-                  <div className="flex items-center justify-between">
-                    <dt className="flex items-center gap-1 text-muted-foreground">
-                      {/* <CreditCard className="h-4 w-4" /> */}
-                      {payment.paymentMode}
-                    </dt>
-                    <dd>{formatPrice(payment.amountRecieved)}</dd>
-                  </div>
-                </dl>
-              </div>
-            );
-          })}
+          {billDetails?.payments?.length && (
+            <div className="grid gap-3">
+              <div className="font-semibold">Payment Information</div>
+              <dl className="grid gap-3 text-xs 2xl:text-sm">
+                {billDetails?.payments?.map((payment) => {
+                  return (
+                    <div
+                      key={payment.id}
+                      className="flex items-center justify-between"
+                    >
+                      <dt className="flex items-center gap-1 text-muted-foreground">
+                        {payment.paymentMode}
+                      </dt>
+                      <dd>{formatPrice(payment.amountRecieved)}</dd>
+                    </div>
+                  );
+                })}
+              </dl>
+            </div>
+          )}
         </CardContent>
         <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3">
           <div className="text-xs text-muted-foreground">

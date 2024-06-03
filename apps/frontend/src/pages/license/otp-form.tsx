@@ -16,6 +16,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { PinInput, PinInputField } from '@/components/custom/pin-input';
 import { Separator } from '@/components/ui/separator';
+import { PasswordInput } from '@/components/custom/password-input';
 
 interface OtpFormProps {
   handleSubmit: (
@@ -75,7 +76,7 @@ export function OtpForm({ ...props }: OtpFormProps) {
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter password" {...field} />
+                  <PasswordInput placeholder="Enter password" {...field} />
                 </FormControl>
                 <FormDescription>
                   Enter password of the Owner/Admin

@@ -38,7 +38,7 @@ export default function OrderHistory() {
       take?: number;
     }) => {
       try {
-        const orderRes = await apis.getAllOrder({
+        const orderRes = await apis.getAllSyncedOrder({
           shopId: args.shopId,
           orderStatusId: args.orderStatusId,
           isClosed: args.isClosed,

@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/custom/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 
 // import { Separator } from '@/components/ui/separator';
@@ -77,6 +77,13 @@ const OrderSummary: React.FC<IOrderSummary> = ({
   );
   const [cancelAlert, setCancelAlert] = useState(false);
   const [cancellationReason, setCancellationReason] = useState('');
+  const [loaderState, setLoaderState] = useState<{ [key: string]: boolean }>({
+    createOrder: false,
+  });
+
+  const handleLoaderState = (key: string, value: boolean) => {
+    setLoaderState((prev) => ({ ...prev, [key]: value }));
+  };
 
   useEffect(() => {
     setTab(!orderDetails ? 'ticket-items' : 'order-items');
@@ -104,7 +111,7 @@ const OrderSummary: React.FC<IOrderSummary> = ({
       });
       setCancellationReason('');
       setCancelAlert(false);
-      navigate(`/${shopDetails?.id}/takeaway`);
+      navigate(`/${shopDetails?.id}/restaurant/takeaway`);
     } catch (error) {
       console.log(error);
     }
@@ -127,6 +134,16 @@ const OrderSummary: React.FC<IOrderSummary> = ({
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const handleCreateOrderClick = async () => {
+    handleLoaderState('createOrder', true);
+    try {
+      await onCreateNewOrder();
+    } catch (error) {
+      console.log(error);
+    }
+    handleLoaderState('createOrder', false);
   };
   return (
     <Card className="overflow-hidden h-full flex flex-col">
@@ -261,10 +278,9 @@ const OrderSummary: React.FC<IOrderSummary> = ({
       <CardFooter className="flex flex-row flex-wrap items-center border-t px-6 py-3 gap-2">
         {tab === 'ticket-items' && (
           <Button
+            loading={loaderState['createOrder']}
             className="flex-1"
-            onClick={() => {
-              onCreateNewOrder();
-            }}
+            onClick={handleCreateOrderClick}
           >
             Place Order
           </Button>

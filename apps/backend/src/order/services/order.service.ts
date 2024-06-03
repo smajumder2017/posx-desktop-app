@@ -6,21 +6,22 @@ import { PrismaService } from '../../infra/database/services/prisma.service';
 const orderId = require('order-id');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const moment = require('moment');
+// import * as moment from 'moment';
 
 @Injectable()
 export class OrderService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async generateOrderNumberAndID() {
-    const count = await this.prismaService.order.count({
-      where: {
-        createdAt: {
-          lte: new Date(moment().add('1', 'd').format('YYYY-MM-DD')),
-          gte: new Date(moment().format('YYYY-MM-DD')),
-        },
-      },
-    });
+    const res: [{ count: number }] = await this.prismaService.$queryRaw(
+      Prisma.sql`SELECT count (*) as count from "Order" o where cast(o.createdAt  AS  integer) > ${
+        moment(moment().format('YYYY-MM-DD')).unix() * 1000
+      } and cast(o.createdAt as integer) <= ${
+        moment(moment().add('1', 'd').format('YYYY-MM-DD')).unix() * 1000
+      }`,
+    );
 
+    const count = Number(res[0].count) || 0;
     return {
       id: orderId('key').generate(),
       orderNumber: (count + 1).toString(),

@@ -110,8 +110,8 @@ const createWindow = async () => {
       autoHideMenuBar: true,
     });
     await bootstrap();
-    console.log(__dirname)
-    win.loadFile(path.join(__dirname, "..", 'public/index.html'));
+    console.log(__dirname);
+    win.loadFile(path.join(__dirname, '..', 'public/index.html'));
     shell.openExternal(`http://localhost:${isDev ? 5173 : 8080}`);
     log.info(app.getAppPath());
     // }

@@ -35,6 +35,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { formatPrice } from '@/utils/currency';
+import { useToast } from '@/components/ui/use-toast';
 
 export default function CreateOrder() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -59,6 +60,7 @@ export default function CreateOrder() {
   const [paid, setPaid] = useState<number | undefined>();
   const [paymentMode, setPaymentMode] = useState('');
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const ticketLength = Object.keys(ticketItems).reduce((acc, curr) => {
     return acc + ticketItems[curr];
@@ -114,6 +116,11 @@ export default function CreateOrder() {
               })) || [],
           };
           await apis.printTicket(payload);
+          toast({
+            title: 'Print Successful',
+            description:
+              'KOT Printed for order number ' + orderDetails.orderNumber,
+          });
         });
       }
     } catch (error) {
@@ -125,7 +132,6 @@ export default function CreateOrder() {
     if (!shopId) {
       return;
     }
-    setLoading(true);
     try {
       const menuItems = menu.flatMap((category) => category.menuItems);
       const selectedItems = menuItems
@@ -153,6 +159,10 @@ export default function CreateOrder() {
         res = (await apis.createOrder(payload)).data;
         setSearchParams({ orderId: res.id });
       }
+      toast({
+        title: 'Order placed',
+        description: 'Order placed with order number ' + res.orderNumber,
+      });
       await handlePrintTicket({
         orderNumber: res.orderNumber,
         items:
@@ -162,11 +172,9 @@ export default function CreateOrder() {
           })) || [],
       });
       setTicketItems({});
-      setLoading(false);
     } catch (error) {
       console.log(error);
     }
-    setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [menu.length, ticketLength, orderId]);
 

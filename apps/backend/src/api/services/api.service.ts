@@ -141,18 +141,16 @@ export class ApiService {
         userRoles: UserRoles[];
         count: number;
         hasNext: boolean;
-      }>(
-        `user/${apiArgs.userId}/roles?skip=${apiArgs.skip}&take=${
-          apiArgs.take
-        }${
-          apiArgs.lastSyncTime ? `&lastSyncTime=${apiArgs.lastSyncTime}` : ''
-        }`,
-        {
-          headers: {
-            Authorization: `bearer ${this.token}`,
-          },
+      }>(`user/${apiArgs.userId}/roles`, {
+        params: {
+          skip: apiArgs.skip,
+          take: apiArgs.take,
+          lastSyncTime: apiArgs.lastSyncTime,
         },
-      ),
+        headers: {
+          Authorization: `bearer ${this.token}`,
+        },
+      }),
     );
   }
 
@@ -309,9 +307,60 @@ export class ApiService {
         }),
       );
       return res.data;
-      console.log(res);
     } catch (error) {
       console.log(error);
+      return Promise.reject(error);
+    }
+  }
+  async getAllOrder(apiArgs: {
+    shopId: string;
+    orderStatusId?: string;
+    employeeId?: string;
+    isClosed?: string;
+    skip: string;
+    take: string;
+  }) {
+    try {
+      const response = await lastValueFrom(
+        this.httpService.get<{ orders: any[]; count: number }>(`order`, {
+          params: apiArgs,
+          headers: {
+            Authorization: `bearer ${this.token}`,
+          },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  }
+
+  async getOrderDetails(orderId: string) {
+    try {
+      const response = await lastValueFrom(
+        this.httpService.get(`order/${orderId}`, {
+          headers: {
+            Authorization: `bearer ${this.token}`,
+          },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  }
+
+  async getActiveBillByOrderId(orderId: string) {
+    try {
+      const response = await lastValueFrom(
+        this.httpService.get(`billing/${orderId}`, {
+          headers: {
+            Authorization: `bearer ${this.token}`,
+          },
+        }),
+      );
+      return response.data;
+    } catch (error) {
       return Promise.reject(error);
     }
   }

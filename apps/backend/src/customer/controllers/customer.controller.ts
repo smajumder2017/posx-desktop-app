@@ -50,7 +50,9 @@ export class CustomerController {
       await this.apiService.getShopToken(user.id, shopLicense.license.number);
       const customerResponse =
         await this.apiService.getCustomerByNumber(contactNo);
-      await this.customerService.create(customerResponse.data);
+
+      if (customerResponse.data)
+        await this.customerService.create(customerResponse.data);
       return customerResponse.data;
     }
     if (id) {
@@ -64,7 +66,7 @@ export class CustomerController {
       await this.apiService.getShopToken(user.id, shopLicense.license.number);
       const customerResponse =
         await this.apiService.getCustomerByNumber(contactNo);
-        await this.customerService.create(customerResponse.data);
+      await this.customerService.create(customerResponse.data);
       return customerResponse.data;
     }
   }

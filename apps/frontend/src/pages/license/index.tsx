@@ -9,8 +9,8 @@ import {
 // import { Link } from 'react-router-dom';
 import { OtpForm } from './otp-form';
 import * as apis from '../../apis';
-import { useCallback, useEffect } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { getValidLicense } from '@/redux/features/licenseSlice';
 import { Label } from '@/components/ui/label';
@@ -36,9 +36,16 @@ const splitNumberInChunks = (
 export default function License() {
   const licenseState = useAppSelector((state) => state.license);
   const authState = useAppSelector((state) => state.auth);
+  const [message, setMessage] = useState<{ message: string; status: string }>({
+    message: 'not initiated',
+    status: 'INIT',
+  });
+  const [syncing, setSyncing] = useState(false);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const validLicense = licenseState.data?.id;
 
   const fetchLicenses = useCallback(
     async () => dispatch(getValidLicense()).unwrap(),
@@ -59,10 +66,12 @@ export default function License() {
         console.log(license);
         if (license.data.valid) {
           localStorage.setItem('shopId', license.data.license.shopId);
-          navigate('/login');
+          setSyncing(true);
+          // navigate('/login');
         }
         console.log(license);
       } catch (error) {
+        setSyncing(false);
         console.log(error);
       }
     },
@@ -73,7 +82,20 @@ export default function License() {
     fetchLicenses();
   }, [fetchLicenses]);
 
-  const validLicense = licenseState.data?.id;
+  useEffect(() => {
+    const eventSource = new EventSource('/api/syncStatusEvent');
+    eventSource.onmessage = ({ data }) => {
+      setMessage(JSON.parse(data));
+      if (data.status === 'SUCCESS') {
+        setSyncing(false);
+        navigate('/login');
+      }
+    };
+    return () => {
+      eventSource.close();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function mask(data: string, charsToMask?: number) {
     return data.split('').map((char, index) => {
@@ -141,8 +163,8 @@ export default function License() {
       </Card>
     );
   }
-
-  if (validLicense && window.location.pathname === 'license') {
+  console.log(window.location.pathname);
+  if (validLicense && window.location.pathname === '/license') {
     return <Navigate to={`/`} state={{ from: location }} replace />;
   }
 
@@ -174,7 +196,20 @@ export default function License() {
               code to owners email.
             </p>
           </div>
-          <OtpForm handleSubmit={validateLicense} />
+          {!validLicense && syncing ? (
+            <div className="flex flex-col justify-center items-center">
+              <p className="text-muted-foreground">{message.message}</p>
+              <Link
+                to="/login"
+                className="underline underline-offset-4 hover:text-primary"
+              >
+                Go to Login
+              </Link>
+            </div>
+          ) : (
+            <OtpForm handleSubmit={validateLicense} />
+          )}
+
           {/* <p className="mt-4 px-8 text-center text-sm text-muted-foreground">
               Haven't received it?{' '}
               <Link

@@ -103,6 +103,9 @@ export const updateOrder = (apiArgs: IOrderUpdateRequest) =>
 export const getOrderById = (orderId: string) =>
   axios.get<IOrderResponse>(`${serverUrl}/order/${orderId}`);
 
+export const getSyncedOrderById = (orderId: string) =>
+  axios.get<IOrderResponse>(`${serverUrl}/order/${orderId}/synced`);
+
 export const getAllOrder = (apiArgs: {
   shopId: string;
   orderStatusId?: number;
@@ -114,6 +117,21 @@ export const getAllOrder = (apiArgs: {
   axios.get<{ orders: IOrderResponse[]; count: number }>(`${serverUrl}/order`, {
     params: apiArgs,
   });
+
+export const getAllSyncedOrder = (apiArgs: {
+  shopId: string;
+  orderStatusId?: number;
+  employeeId?: string;
+  isClosed?: boolean;
+  skip: number;
+  take: number;
+}) =>
+  axios.get<{ orders: IOrderResponse[]; count: number }>(
+    `${serverUrl}/order/synced`,
+    {
+      params: apiArgs,
+    },
+  );
 
 export const createNewOrderItems = (
   orderId: string,
@@ -128,6 +146,9 @@ export const createBill = (apiArgs: ICreateBillRequest) =>
 
 export const getActiveBill = (orderId: string) =>
   axios.get<IBillResponse>(`${serverUrl}/billing/${orderId}`);
+
+export const getSyncedActiveBill = (orderId: string) =>
+  axios.get<IBillResponse>(`${serverUrl}/billing/${orderId}/synced`);
 
 export const capturePayment = (apiArgs: ICreatePaymentRequest) =>
   axios.post<ICreatePaymentResponse>(`${serverUrl}/payment`, apiArgs);

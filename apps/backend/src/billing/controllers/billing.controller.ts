@@ -14,11 +14,19 @@ import { BillingService } from '../services/billing.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CreateBillingDto } from '../dto/billing.dto';
 import { Prisma } from '@prisma/client';
+import { GetUser } from 'src/auth/decorators/user.decorator';
+import { JwtPayload } from 'src/auth/interfaces';
+import { ApiService } from 'src/api/services/api.service';
+import { LicenseService } from 'src/license/services/license.service';
 
 @Controller('billing')
 export class BillingController {
   private readonly logger = new Logger(BillingController.name);
-  constructor(private billingService: BillingService) {}
+  constructor(
+    private billingService: BillingService,
+    private readonly apiService: ApiService,
+    private readonly licenseService: LicenseService,
+  ) {}
 
   // @ApiResponse({
   //   type: BillingResponseDto,
@@ -67,5 +75,21 @@ export class BillingController {
   @Get(':orderId')
   async getBillByOrderId(@Param('orderId') orderId: string) {
     return this.billingService.findActiveBillByOrderId(orderId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':orderId/synced')
+  async getSyncedBillsByOrderId(
+    @Param('orderId') orderId: string,
+    @GetUser() user: JwtPayload,
+  ) {
+    const licenses = await this.licenseService.getActiveLicense();
+    const shopLicense = licenses.find((license) => license.license.shopId);
+    const response = await this.apiService.getShopToken(
+      user.id,
+      shopLicense.license.number,
+    );
+    this.apiService.setToken(response.data.accessToken);
+    return this.apiService.getActiveBillByOrderId(orderId);
   }
 }
