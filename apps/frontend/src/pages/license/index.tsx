@@ -163,7 +163,7 @@ export default function License() {
       </Card>
     );
   }
-  console.log(window.location.pathname);
+
   if (validLicense && window.location.pathname === '/license') {
     return <Navigate to={`/`} state={{ from: location }} replace />;
   }
