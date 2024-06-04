@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { OrderService } from './services/order.service';
 import { DatabaseModule } from '../infra/database/database.module';
 import { OrderController } from './controller/order.controller';
-import { ApiModule } from 'src/api/api.module';
-import { LicenseModule } from 'src/license/license.module';
+import { ApiModule } from '../api/api.module';
+import { LicenseModule } from '../license/license.module';
 
 @Module({
   imports: [DatabaseModule, ApiModule, LicenseModule],

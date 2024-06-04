@@ -21,10 +21,10 @@ import {
 import { OrderService } from '../services/order.service';
 import { Prisma } from '@prisma/client';
 import { ApiResponse } from '@nestjs/swagger';
-import { ApiService } from 'src/api/services/api.service';
-import { GetUser } from 'src/auth/decorators/user.decorator';
-import { JwtPayload } from 'src/auth/interfaces';
-import { LicenseService } from 'src/license/services/license.service';
+import { ApiService } from '../../api/services/api.service';
+import { GetUser } from '../../auth/decorators/user.decorator';
+import { JwtPayload } from '../../auth/interfaces';
+import { LicenseService } from '../../license/services/license.service';
 
 @Controller('order')
 export class OrderController {
