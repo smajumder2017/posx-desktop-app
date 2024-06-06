@@ -93,6 +93,13 @@ const OrderSummary: React.FC<IOrderSummary> = ({
     .filter((item) => ticketItems[item.id])
     .map((item) => ({ ...item, quantity: ticketItems[item.id] }));
 
+  useEffect(() => {
+    if (selectedItems.length && tab === 'order-items') {
+      setTab('ticket-items');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedItems.length]);
+
   const totalPrice = orderDetails?.items?.reduce((acc, curr) => {
     acc += curr.price * curr.quantity;
     return acc;
@@ -281,6 +288,7 @@ const OrderSummary: React.FC<IOrderSummary> = ({
             loading={loaderState['createOrder']}
             className="flex-1"
             onClick={handleCreateOrderClick}
+            disabled={!Object.keys(ticketItems).length}
           >
             Place Order
           </Button>
@@ -300,7 +308,7 @@ const OrderSummary: React.FC<IOrderSummary> = ({
             {bill && !bill.isSetteled && (
               <Button
                 variant={'outline'}
-                className="col-span-1"
+                className="col-span-1 border-dashed border-gray-500"
                 onClick={onSettelClick}
               >
                 Settel Order

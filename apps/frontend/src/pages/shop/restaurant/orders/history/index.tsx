@@ -14,6 +14,7 @@ import {
   CardContent,
 } from '@/components/ui/card';
 import { Paginate } from '@/components/custom/paginate';
+import { Loader } from '@/components/custom/loader';
 
 export default function OrderHistory() {
   const { shopId } = useParams<{
@@ -24,6 +25,7 @@ export default function OrderHistory() {
   const [selectedOrder, setSelectedOrder] = useState('');
   const authState = useAppSelector((state) => state.auth);
   const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const page = parseInt(searchParams.get('page') || '0');
   const itemsPerPage = 20;
@@ -37,6 +39,7 @@ export default function OrderHistory() {
       skip?: number;
       take?: number;
     }) => {
+      setLoading(true);
       try {
         const orderRes = await apis.getAllSyncedOrder({
           shopId: args.shopId,
@@ -51,6 +54,7 @@ export default function OrderHistory() {
       } catch (error) {
         console.log(error);
       }
+      setLoading(false);
     },
     [],
   );
@@ -92,13 +96,15 @@ export default function OrderHistory() {
                 store.
               </CardDescription>
             </CardHeader>
-
+            {loading && <Loader />}
             <CardContent>
-              <OrderList
-                orders={orders}
-                onOrderSelect={setSelectedOrder}
-                selectedOrder={selectedOrder}
-              />
+              {orders.length ? (
+                <OrderList
+                  orders={orders}
+                  onOrderSelect={setSelectedOrder}
+                  selectedOrder={selectedOrder}
+                />
+              ) : null}
             </CardContent>
           </Card>
           {orders.length ? (
@@ -115,6 +121,7 @@ export default function OrderHistory() {
         {selectedOrder && (
           <div>
             <OrderDetails
+              syncedOrders
               orderId={selectedOrder}
               onClose={() => setSelectedOrder('')}
             />

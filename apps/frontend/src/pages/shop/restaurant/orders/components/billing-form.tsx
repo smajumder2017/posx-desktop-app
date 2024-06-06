@@ -34,6 +34,8 @@ import {
 import { formatPrice } from '@/utils/currency';
 import { useState } from 'react';
 import { IShopResponse } from '@/models/shop';
+import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export interface IBillingFormPayload {
   totalPrice: number;
@@ -113,8 +115,29 @@ const BillingForm: React.FC<IBillingFormProps> = ({
     setPartialPayment(value);
   };
 
+  const handleDismiss = (value: boolean) => {
+    setPaymentMode('');
+    setServiceCharge(shopDetails?.serviceChargePercentage ? true : false);
+    setGstCharge(shopDetails?.gstinNo ? true : false);
+    setPackingCharge(false);
+    setPackingChargeAmount(undefined);
+    setPartialPayment(false);
+    setPaid(undefined);
+    setDiscount(undefined);
+    onOpenChange(value);
+  };
+
+  const finalAmount =
+    (totalPrice || 0) +
+    serviceChargeAmnt +
+    gst +
+    (packingChargeAmount || 0) -
+    (discount || 0);
+
+  const validSettelment = (paid || 0) < finalAmount;
+
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
+    <Drawer open={open} onOpenChange={handleDismiss}>
       <DrawerContent className="p-4">
         <DrawerHeader>
           <DrawerTitle>
@@ -244,7 +267,10 @@ const BillingForm: React.FC<IBillingFormProps> = ({
             <div className="font-medium">Bill Preview</div>
             <div className="mt-2">
               <ScrollArea style={{ maxHeight: 'calc(100svh - 320px)' }}>
-                <Table className="text-xs border border-dashed rounded">
+                <Table
+                  className="text-xs"
+                  containerClassName="border border-dashed rounded-lg"
+                >
                   <TableHeader>
                     <TableRow>
                       <TableHead className="hidden sm:table-cell">
@@ -335,13 +361,7 @@ const BillingForm: React.FC<IBillingFormProps> = ({
                       <TableCell>Final</TableCell>
                       <TableCell className="text-center"></TableCell>
                       <TableCell className="text-right">
-                        {formatPrice(
-                          (totalPrice || 0) +
-                            serviceChargeAmnt +
-                            gst +
-                            (packingChargeAmount || 0) -
-                            (discount || 0),
-                        )}
+                        {formatPrice(finalAmount)}
                       </TableCell>
                     </TableRow>
                   </TableFooter>
@@ -350,8 +370,24 @@ const BillingForm: React.FC<IBillingFormProps> = ({
             </div>
           </div>
         </div>
+        <div className="pt-4">
+          {partialPayment && (paid || 0 > 0) && !validSettelment ? (
+            <Alert variant="destructive">
+              <ExclamationTriangleIcon className="h-4 w-4" />
+              <AlertTitle>Cannot settel given amount</AlertTitle>
+              <AlertDescription>
+                Settelment amount cannot be greater than pending amount
+              </AlertDescription>
+            </Alert>
+          ) : null}
+        </div>
         <DrawerFooter className="flex flex-row justify-end">
-          <Button onClick={handleGenerateBillClick}>Generate Bill</Button>
+          <Button
+            onClick={handleGenerateBillClick}
+            disabled={(partialPayment && !paid) || !validSettelment}
+          >
+            Generate Bill
+          </Button>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>

@@ -35,33 +35,160 @@ import { prettyDateTime } from '@/utils/date';
 import { MdClose } from 'react-icons/md';
 import { formatPhoneNumberIntl } from 'react-phone-number-input';
 import { posXDB } from '@/db/db';
+import { IconPrinter } from '@tabler/icons-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface IOrderDetailsProps {
+  syncedOrders?: boolean;
   orderId: string;
   onClose?: () => void;
 }
 
-const OrderDetails: React.FC<IOrderDetailsProps> = ({ orderId, onClose }) => {
+export function SkeletonCard() {
+  return (
+    <Card className="overflow-hidden">
+      <CardHeader className="flex flex-row items-start bg-muted/50 gap-4">
+        <div className="grid gap-0.5">
+          <CardTitle className="group flex items-center gap-2 text-md">
+            <Skeleton className="h-4 w-[250px]" />
+          </CardTitle>
+          <CardDescription>
+            <Skeleton className="h-4 w-[250px]" />
+          </CardDescription>
+        </div>
+        <div className="ml-auto flex items-center gap-1">
+          <Skeleton className="h-4 w-8" />
+        </div>
+      </CardHeader>
+      <CardContent className="p-6 text-sm">
+        <div className="flex flex-col gap-2">
+          <div className="font-semibold">Order Details</div>
+          <Table
+            className="text-xs 2xl:text-sm"
+            // containerClassName="border border-dashed rounded-lg"
+          >
+            <TableHeader>
+              <TableRow>
+                <TableHead className="hidden sm:table-cell">Item</TableHead>
+                <TableHead className="text-center">Qty</TableHead>
+                <TableHead className="text-right">Price</TableHead>
+                <TableHead className="text-right">Amount</TableHead>
+              </TableRow>
+            </TableHeader>
+
+            <TableBody>
+              {new Array(4).fill('').map((_, index) => {
+                return (
+                  <TableRow key={index}>
+                    <TableCell>
+                      <Skeleton className="h-4" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4" />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TableCell>
+                  <Skeleton className="h-4" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4" />
+                </TableCell>
+              </TableRow>
+
+              <TableRow className="font-normal border-t border-dashed">
+                <TableCell>
+                  <Skeleton className="h-4" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4" />
+                </TableCell>{' '}
+                <TableCell>
+                  <Skeleton className="h-4" />
+                </TableCell>
+              </TableRow>
+            </TableFooter>
+          </Table>
+        </div>
+
+        <>
+          <Separator className="my-4" />
+          <div className="grid gap-3">
+            <div className="font-semibold">Customer Information</div>
+            <dl className="grid gap-3 text-xs 2xl:text-sm">
+              <Skeleton className="h-4 w-[250px]" />
+            </dl>
+          </div>
+        </>
+
+        <Separator className="my-4" />
+        <div className="grid gap-3">
+          <div className="font-semibold">Payment Information</div>
+          <Skeleton className="h-4 w-[250px]" />
+        </div>
+      </CardContent>
+      <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3">
+        <div className="text-xs text-muted-foreground">
+          <Skeleton className="h-4 w-[250px]" />
+        </div>
+      </CardFooter>
+    </Card>
+  );
+}
+
+const OrderDetails: React.FC<IOrderDetailsProps> = ({
+  orderId,
+  onClose,
+  syncedOrders,
+}) => {
   const [orderDetails, setOrderDetails] = useState<IOrderResponse>();
   const [billDetails, setBillDetails] = useState<IBillResponse>();
+  const [loader, setLoader] = useState(false);
 
   const getOrderDetails = useCallback(async (orderId: string) => {
+    setLoader(true);
     try {
-      const orderDetailsResponse = await apis.getSyncedOrderById(orderId);
+      const orderDetailsResponse = syncedOrders
+        ? await apis.getSyncedOrderById(orderId)
+        : await apis.getOrderById(orderId);
       setOrderDetails(orderDetailsResponse.data);
     } catch (error) {
       console.log(error);
     }
+    setLoader(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getBillDetails = useCallback(async (orderId: string) => {
+    setLoader(true);
     try {
-      const orderDetailsResponse = await apis.getSyncedActiveBill(orderId);
+      const orderDetailsResponse = syncedOrders
+        ? await apis.getSyncedActiveBill(orderId)
+        : await apis.getActiveBill(orderId);
       setBillDetails(orderDetailsResponse.data);
     } catch (error) {
       console.log(error);
     }
+    setLoader(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -119,6 +246,10 @@ const OrderDetails: React.FC<IOrderDetailsProps> = ({ orderId, onClose }) => {
     }
   };
 
+  if (loader) {
+    return <SkeletonCard />;
+  }
+
   if (orderDetails)
     return (
       <Card className="overflow-hidden">
@@ -147,7 +278,7 @@ const OrderDetails: React.FC<IOrderDetailsProps> = ({ orderId, onClose }) => {
                 className="h-8 gap-1"
                 onClick={onPrintBillClick}
               >
-                {/* <Truck className="h-3.5 w-3.5" /> */}
+                <IconPrinter className="h-3.5 w-3.5" />
                 <span className="lg:sr-only xl:not-sr-only xl:whitespace-nowrap">
                   Print bill
                 </span>

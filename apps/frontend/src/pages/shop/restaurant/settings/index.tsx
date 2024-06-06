@@ -1,11 +1,11 @@
 import { Outlet, useParams } from 'react-router-dom';
 import {
+  IconPrinter,
   // IconBrowserCheck,
   // IconExclamationCircle,
   // IconNotification,
   // IconPalette,
   IconTool,
-  IconUser,
 } from '@tabler/icons-react';
 
 import { Separator } from '@/components/ui/separator';
@@ -46,7 +46,7 @@ export default function Settings() {
 const sidebarNavItems = (shopId: string) => [
   {
     title: 'Printers',
-    icon: <IconUser size={18} />,
+    icon: <IconPrinter size={18} />,
     href: `/${shopId}/restaurant/settings`,
   },
   {

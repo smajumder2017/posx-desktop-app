@@ -17,6 +17,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
 
 import {
   Select,
@@ -36,6 +44,11 @@ import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { formatPrice } from '@/utils/currency';
 import { useToast } from '@/components/ui/use-toast';
+import { BillDisplay } from '../components/bill';
+
+import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
+
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function CreateOrder() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -263,7 +276,9 @@ export default function CreateOrder() {
             paymentMode: payload.paymentMode,
           });
         }
-
+        setOpenBilling(false);
+        await getOrderDetails(orderDetails.id);
+        await getBillDetails(orderDetails.id);
         const billingPrinter = await posXDB.printers
           .where('printerLocation')
           .equals('billing')
@@ -305,24 +320,34 @@ export default function CreateOrder() {
               : undefined,
           });
         }
-        setOpenBilling(false);
-        await getOrderDetails(orderDetails.id);
-        await getBillDetails(orderDetails.id);
       }
     } catch (error) {
       console.log(error);
     }
   };
 
+  const resetSettel = (value: boolean) => {
+    setPaymentMode('');
+    setPaid(undefined);
+    setPartialPayment(false);
+    setPaymentMode('');
+    setOpenSettel(value);
+  };
+
   const handleSettelClick = async () => {
     if (bill && orderDetails) {
-      await apis.capturePayment({
-        amountRecieved: paid || pendingAmount,
-        billId: bill.id,
-        paymentMode: paymentMode,
-      });
-      await getOrderDetails(orderDetails.id);
-      await getBillDetails(orderDetails.id);
+      try {
+        await apis.capturePayment({
+          amountRecieved: paid || pendingAmount,
+          billId: bill.id,
+          paymentMode: paymentMode,
+        });
+        resetSettel(false);
+        await getOrderDetails(orderDetails.id);
+        await getBillDetails(orderDetails.id);
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
 
@@ -344,6 +369,7 @@ export default function CreateOrder() {
       return acc + curr.amountRecieved;
     }, 0) || 0;
   const pendingAmount = totalBillAmount - paidAmount;
+  const validSettelment = (paid || 0) < pendingAmount;
 
   return (
     <div className="max-h-full flex flex-col flex-grow">
@@ -373,28 +399,27 @@ export default function CreateOrder() {
         </div>
       </div>
 
-      <div className="pt-4">
-        <div className="flex-1 grid grid-flow-col grid-cols-12 space-x-4">
-          <div className="col-span-8 2xl:col-span-9">
-            {menu.length && <Menu data={menu} onItemSelect={onMenuItemClick} />}
-          </div>
-          <div className="col-span-4 2xl:col-span-3">
-            <OrderSummary
-              shopDetails={shopState.data}
-              onQtyChange={onMenuItemClick}
-              menuItems={menu.flatMap((category) => category.menuItems)}
-              ticketItems={ticketItems}
-              bill={bill}
-              onSettelClick={() => setOpenSettel(true)}
-              onCreateNewOrder={handleCreateNewOrder}
-              onPrintTicket={handlePrintTicket}
-              orderDetails={orderDetails}
-              onItemDelete={handleItemDeleteClick}
-              onBillingClick={() => setOpenBilling(true)}
-            />
-          </div>
+      <div className="pt-4 grid grid-cols-12 space-x-4 invisible md:visible">
+        <div className="col-span-8 2xl:col-span-9">
+          {menu.length && <Menu data={menu} onItemSelect={onMenuItemClick} />}
+        </div>
+        <div className="col-span-4 2xl:col-span-3">
+          <OrderSummary
+            shopDetails={shopState.data}
+            onQtyChange={onMenuItemClick}
+            menuItems={menu.flatMap((category) => category.menuItems)}
+            ticketItems={ticketItems}
+            bill={bill}
+            onSettelClick={() => setOpenSettel(true)}
+            onCreateNewOrder={handleCreateNewOrder}
+            onPrintTicket={handlePrintTicket}
+            orderDetails={orderDetails}
+            onItemDelete={handleItemDeleteClick}
+            onBillingClick={() => setOpenBilling(true)}
+          />
         </div>
       </div>
+
       <AlertDialog
         open={!!itemToDelete}
         onOpenChange={(value) => setItemToDelete(value ? itemToDelete : '')}
@@ -448,73 +473,105 @@ export default function CreateOrder() {
         customer={customer}
         onFormSubmit={handleGenerateBillClick}
       />
-      <AlertDialog open={openSettel} onOpenChange={setOpenSettel}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Settel Pending Amount</AlertDialogTitle>
-            <AlertDialogDescription>
+      <Drawer open={openSettel} onOpenChange={resetSettel}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Settel Pending Amount</DrawerTitle>
+            <DrawerDescription>
               Setteling the amount will close the order
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="space-y-0.5 col-span-1">
-            <Label>Payment method</Label>
-            <Select onValueChange={setPaymentMode} value={paymentMode}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a payment method" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Payment methods</SelectLabel>
-                  <SelectItem value="CreditCard">Credit Card</SelectItem>
-                  <SelectItem value="DebitCard">Debit Card</SelectItem>
-                  <SelectItem value="Cash">Cash</SelectItem>
-                  <SelectItem value="UPI">UPI</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm col-span-1">
-            <div className="space-y-0.5">
-              <Label>Partial payment</Label>
-              <div className="text-sm font-light">
-                Check this to capture partial payment
+            </DrawerDescription>
+          </DrawerHeader>
+          <div className="grid grid-cols-12 p-4 gap-4">
+            <div className="col-span-8 space-y-4">
+              <div className="space-y-0.5 col-span-1">
+                <Label>Payment method</Label>
+                <Select onValueChange={setPaymentMode} value={paymentMode}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a payment method" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Payment methods</SelectLabel>
+                      <SelectItem value="CreditCard">Credit Card</SelectItem>
+                      <SelectItem value="DebitCard">Debit Card</SelectItem>
+                      <SelectItem value="Cash">Cash</SelectItem>
+                      <SelectItem value="UPI">UPI</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm col-span-1">
+                <div className="space-y-0.5">
+                  <Label>Partial payment</Label>
+                  <div className="text-sm font-light">
+                    Check this to capture partial payment
+                  </div>
+                </div>
+
+                <Switch
+                  checked={partialPayment}
+                  onCheckedChange={(value) => {
+                    setPartialPayment(value);
+                    setPaid(undefined);
+                  }}
+                />
+              </div>
+              <div className="space-y-0.5 col-span-1">
+                <Label htmlFor="offerCode" className="text-right">
+                  Payment amount
+                </Label>
+                <Input
+                  disabled={!partialPayment}
+                  placeholder="Enter payment amount"
+                  type="number"
+                  value={paid || ''}
+                  onChange={(e) => {
+                    setPaid(parseInt(e.target.value || '0'));
+                  }}
+                />
               </div>
             </div>
+            <div className="col-span-4">
+              <div className="font-medium">Bill Preview</div>
+              <BillDisplay
+                orderDetails={orderDetails}
+                discount={bill?.discount}
+                gst={bill?.gst}
+                serviceChargeAmnt={bill?.serviceCharges}
+                amount={bill?.amount}
+                paid={(bill?.totalAmount || 0) - pendingAmount}
+                roundoffDiff={bill?.roundoffDiff}
+                final={pendingAmount}
+              />
+            </div>
+          </div>
+          <div className="p-4">
+            {(paid || 0 > 0) && !validSettelment ? (
+              <Alert variant="destructive">
+                <ExclamationTriangleIcon className="h-4 w-4" />
+                <AlertTitle>Cannot settel given amount</AlertTitle>
+                <AlertDescription>
+                  Settelment amount cannot be greater than pending amount
+                </AlertDescription>
+              </Alert>
+            ) : null}
+          </div>
 
-            <Switch
-              checked={partialPayment}
-              onCheckedChange={setPartialPayment}
-            />
-          </div>
-          <div className="space-y-0.5 col-span-1">
-            <Label htmlFor="offerCode" className="text-right">
-              Payment amount
-            </Label>
-            <Input
-              disabled={!partialPayment}
-              placeholder="Enter payment amount"
-              type="number"
-              value={paid || ''}
-              onChange={(e) => {
-                setPaid(parseInt(e.target.value || '0'));
-              }}
-            />
-          </div>
-          <AlertDialogFooter>
-            <Button
-              variant={'secondary'}
-              onClick={() => {
-                setOpenSettel(false);
-              }}
-            >
+          <DrawerFooter className="flex flex-row justify-end">
+            <Button variant={'secondary'} onClick={() => resetSettel(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSettelClick} disabled={!paymentMode}>
+            <Button
+              onClick={handleSettelClick}
+              disabled={
+                !paymentMode || (partialPayment && !paid) || !validSettelment
+              }
+            >
               Settel {formatPrice(paid || pendingAmount)}
             </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }
