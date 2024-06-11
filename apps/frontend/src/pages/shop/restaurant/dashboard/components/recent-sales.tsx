@@ -49,7 +49,9 @@ export function RecentSales() {
     <div className="space-y-8">
       {orders.map((order) => {
         const lname = order?.customer?.name.split(' ')?.[1];
-        const initials = `${order?.customer?.name[0].toUpperCase()}${lname?.[0]?.toUpperCase()}`;
+        const initials = `${order?.customer?.name[0].toUpperCase()}${
+          lname?.[0]?.toUpperCase() || ''
+        }`;
         return (
           <div className="flex items-center" key={order.id}>
             <Avatar className="h-9 w-9">

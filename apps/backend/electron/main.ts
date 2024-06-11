@@ -115,14 +115,36 @@ const createWindow = async () => {
     shell.openExternal(`http://localhost:${isDev ? 5173 : 8080}`);
     log.info(app.getAppPath());
     // }
+    return win;
   } catch (error) {
     log.error(error);
   }
 };
 
-app.whenReady().then(() => {
-  createWindow();
-});
+let myWindow = null;
+
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    // Someone tried to start a second instance, focus our window.
+    if (myWindow) {
+      if (myWindow.isMinimized()) myWindow.restore();
+      myWindow.focus();
+    }
+  });
+
+  // Create myWindow, load the rest of the application, etc.
+  app.on('ready', async () => {
+    myWindow = await createWindow();
+  });
+}
+
+// app.whenReady().then(() => {
+//   createWindow();
+// });
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
