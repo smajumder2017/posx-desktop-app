@@ -70,7 +70,10 @@ export const CustomerForm: React.FC<PropsWithChildren<ICustomerFormProps>> = (
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col gap-4"
+      >
         <FormField
           control={form.control}
           name="name"
@@ -128,7 +131,9 @@ export const CustomerForm: React.FC<PropsWithChildren<ICustomerFormProps>> = (
             </FormItem>
           )}
         /> */}
-        <Button type="submit">Submit</Button>
+        <Button type="submit" className="mt-4">
+          Submit
+        </Button>
       </form>
     </Form>
   );

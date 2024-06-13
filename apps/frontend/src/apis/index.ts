@@ -25,6 +25,7 @@ import {
 } from '@/models/billing';
 
 import { ISalesResponse } from '@/models/dashboard';
+import { ILocationResponse } from '@/models/location';
 
 const serverUrl = '/api';
 
@@ -180,3 +181,8 @@ export const getPrinterStatus = (apiArgs: { type: string; value: string }) =>
 
 export const getSalesData = (shopId: string) =>
   axios.get<ISalesResponse>(`${serverUrl}/dashboard/sales/${shopId}`);
+
+export const searchLocation = (address: string) =>
+  axios.get<ILocationResponse>(`${serverUrl}/location`, {
+    params: { address },
+  });

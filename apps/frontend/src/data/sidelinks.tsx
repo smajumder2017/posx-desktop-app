@@ -19,6 +19,7 @@ import {
   IconSettings,
   // IconTruck,
   IconMoped,
+  IconCar,
   IconCheck,
   // IconUserShield,
   // IconUsers,
@@ -58,6 +59,12 @@ export function sidelinks(
             title: 'Takeaway',
             label: '',
             href: `/${shopId}/${shopType}/takeaway`,
+            icon: <IconCar size={18} />,
+          },
+          {
+            title: 'Delivery',
+            label: '',
+            href: `/${shopId}/${shopType}/delivery`,
             icon: <IconMoped size={18} />,
           },
           {

@@ -364,4 +364,22 @@ export class ApiService {
       return Promise.reject(error);
     }
   }
+
+  async searchLocation(address: string) {
+    try {
+      const response = await lastValueFrom(
+        this.httpService.get(`location`, {
+          headers: {
+            Authorization: `bearer ${this.token}`,
+          },
+          params: {
+            address,
+          },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  }
 }

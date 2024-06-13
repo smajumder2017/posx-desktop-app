@@ -16,6 +16,7 @@ import CreateOrder from './pages/shop/restaurant/orders/create';
 import OrderHistory from './pages/shop/restaurant/orders/history';
 import Printers from './pages/shop/restaurant/settings/printers';
 import Settings from './pages/shop/restaurant/settings';
+import Delivery from './pages/shop/restaurant/orders/delivery';
 
 const router = createBrowserRouter([
   {
@@ -64,6 +65,14 @@ const router = createBrowserRouter([
       },
       {
         path: 'takeaway/:customerId',
+        element: <CreateOrder />,
+      },
+      {
+        path: 'delivery',
+        element: <Delivery />,
+      },
+      {
+        path: 'delivery/:customerId',
         element: <CreateOrder />,
       },
       {

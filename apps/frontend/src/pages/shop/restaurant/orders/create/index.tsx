@@ -1,6 +1,11 @@
 import OrderSummary from '../components/order-summary';
 import Menu from '../components/menu';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom';
 import { useCallback, useEffect, useState } from 'react';
 import * as apis from '@/apis';
 import { ICustomer } from '@/models/customer';
@@ -51,6 +56,7 @@ import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function CreateOrder() {
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const orderId = searchParams.get('orderId');
   const [, setLoading] = useState(false);
@@ -74,6 +80,8 @@ export default function CreateOrder() {
   const [paymentMode, setPaymentMode] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  console.log(location.state);
 
   const ticketLength = Object.keys(ticketItems).reduce((acc, curr) => {
     return acc + ticketItems[curr];

@@ -20,6 +20,7 @@ import { OrderModule } from './order/order.module';
 import { PrinterModule } from './printer/printer.module';
 import { BillingModule } from './billing/billing.module';
 import { PaymentModule } from './payment/payment.module';
+import { LocationModule } from './location/location.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { PaymentModule } from './payment/payment.module';
     PrinterModule,
     BillingModule,
     PaymentModule,
+    LocationModule,
   ],
   controllers: [AppController],
   providers: [AppService, EventsService],
