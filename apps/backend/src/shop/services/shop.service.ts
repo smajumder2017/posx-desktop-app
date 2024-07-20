@@ -11,4 +11,10 @@ export class ShopService {
       include: { shopType: true },
     });
   }
+
+  findShopConfig(shopId: string) {
+    return this.prismaService.shopConfig.findUnique({
+      where: { shopId },
+    });
+  }
 }

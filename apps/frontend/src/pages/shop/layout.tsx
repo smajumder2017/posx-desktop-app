@@ -8,6 +8,7 @@ import { UserNav } from '@/components/user-nav';
 import { useAppSelector, useAppDispatch } from '@/hooks/redux';
 import { getShopDetails } from '@/redux/features/shopSlice';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { getShopConfig } from '@/redux/features/configSlice';
 
 export default function ShopLayout() {
   const [isCollapsed, setIsCollapsed] = useIsCollapsed();
@@ -21,9 +22,16 @@ export default function ShopLayout() {
     return dispatch(getShopDetails(id)).unwrap();
   }, []);
 
+  const fetchShopConfig = useCallback(async (id: string) => {
+    return dispatch(getShopConfig(id)).unwrap();
+  }, []);
+
   useEffect(() => {
-    if (shopId) fetchShopDetails(shopId);
-  }, [shopId, fetchShopDetails]);
+    if (shopId) {
+      fetchShopDetails(shopId);
+      fetchShopConfig(shopId);
+    }
+  }, [shopId, fetchShopDetails, fetchShopConfig]);
 
   useEffect(() => {
     if (content.current) {
@@ -67,7 +75,7 @@ export default function ShopLayout() {
               <UserNav />
             </div>
           </LayoutHeader>
-          <LayoutBody className="space-y-2 overflow-y-scroll" ref={content}>
+          <LayoutBody className="space-y-2 overflow-y-auto" ref={content}>
             <Outlet />
           </LayoutBody>
         </Layout>

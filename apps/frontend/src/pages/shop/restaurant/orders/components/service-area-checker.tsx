@@ -49,6 +49,7 @@ const ServicableAreaChecker: React.FC<
     },
   });
   const shopDetails = useAppSelector((state) => state.shop);
+  const shopConfig = useAppSelector((state) => state.shopConfig);
   const [loading, setLoading] = useState(false);
   const [selectedLocation, setSelectedLocation] =
     useState<LocationResultsEntity>();
@@ -86,6 +87,7 @@ const ServicableAreaChecker: React.FC<
   }
 
   const checkValidLocation = (loc: LocationResultsEntity) => {
+    const serviceRadius = shopConfig.data?.config.delivery.serviceRadius || 0;
     const customerLocation = loc.geometry.location;
     const shopLocation = {
       lat: parseFloat(shopDetails.data?.latitude || '0'),
@@ -93,7 +95,7 @@ const ServicableAreaChecker: React.FC<
     };
     const distance = haversineDistance(customerLocation, shopLocation);
     console.log(distance);
-    if (distance > 2000) {
+    if (distance > serviceRadius * 1000) {
       setError('This location is outside of servicable area');
     }
     setSelectedLocation(loc);

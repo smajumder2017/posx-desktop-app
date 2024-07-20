@@ -49,7 +49,6 @@ export class OrderController {
       orderStatusId: 1,
       items: orderItems,
     });
-    return;
   }
 
   @UseGuards(JwtAuthGuard)
@@ -60,7 +59,7 @@ export class OrderController {
   ) {
     const order = await this.orderService.findOrderById(orderId);
     if (!order) {
-      throw new BadRequestException('Order does nott exist');
+      throw new BadRequestException('Order does not exist');
     }
     const existingItems = order.items;
     const updatableItems: Prisma.OrderItemUncheckedUpdateManyInput[] = [];

@@ -17,6 +17,7 @@ import {
 } from '@prisma/client';
 import { AxiosResponse } from 'axios';
 import { lastValueFrom } from 'rxjs';
+import { IShopConfigResponse } from '../interfaces';
 
 @Injectable()
 export class ApiService {
@@ -180,6 +181,16 @@ export class ApiService {
   async getShopDetails(shopId: string) {
     return lastValueFrom(
       this.httpService.get<Shop>(`shop/${shopId}`, {
+        headers: {
+          Authorization: `bearer ${this.token}`,
+        },
+      }),
+    );
+  }
+
+  async getShopConfig(shopId: string) {
+    return lastValueFrom(
+      this.httpService.get<IShopConfigResponse>(`shop/config/${shopId}`, {
         headers: {
           Authorization: `bearer ${this.token}`,
         },

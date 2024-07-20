@@ -94,6 +94,12 @@ export class SyncService {
         status: 'PROGRESS',
       });
 
+      await this.syncShopConfig(shopId);
+      this.eventService.emit('syncStatus', {
+        message: 'Shop config synced',
+        status: 'PROGRESS',
+      });
+
       await this.syncShopUsers(shopId);
       this.eventService.emit('syncStatus', {
         message: 'Shop users synced',
@@ -319,6 +325,21 @@ export class SyncService {
       where: { id: shopDetails.data.id },
       create: shopDetails.data,
       update: shopDetails.data,
+    });
+  }
+
+  private async syncShopConfig(shopId: string) {
+    const shopConfig = await this.apiService.getShopConfig(shopId);
+    await this.prismaService.shopConfig.upsert({
+      where: { id: shopConfig.data.id },
+      create: {
+        ...shopConfig.data,
+        config: JSON.stringify(shopConfig.data.config),
+      },
+      update: {
+        ...shopConfig.data,
+        config: JSON.stringify(shopConfig.data.config),
+      },
     });
   }
 

@@ -31,8 +31,7 @@ console.log(dbPath);
 process.env.DATABASE_URL = dbUrl;
 
 // This needs to be updated every time you create a migration!
-export const latestMigration =
-  '20240603140434_add_is_active_column_in_userrole_shopuser';
+export const latestMigration = '20240618021807_add_shop_config_table';
 export const platformToExecutables: any = {
   win32: {
     migrationEngine: 'node_modules/@prisma/engines/schema-engine-windows.exe',

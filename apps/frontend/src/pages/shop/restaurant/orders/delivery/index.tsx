@@ -26,6 +26,7 @@ const Delivery = () => {
     shopId: string;
   }>();
 
+  console.log(shopId);
   const handleTabChange = (value: string) => {
     setTab(value);
     // setSearchParams((prev) => {
@@ -45,11 +46,7 @@ const Delivery = () => {
 
   const handleProceed = (address: LocationResultsEntity) => {
     if (customer && address) {
-      navigate(customer.id, {
-        state: {
-          address,
-        },
-      });
+      navigate(`${customer.id}?placeId=${address.place_id}`);
     }
   };
 

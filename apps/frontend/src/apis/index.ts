@@ -9,7 +9,7 @@ import {
   IOrderResponse,
   IOrderUpdateRequest,
 } from '@/models/order';
-import { IShopResponse } from '@/models/shop';
+import { IShopConfigResponse, IShopResponse } from '@/models/shop';
 import {
   IPrintBillPayload,
   IPrintTicketRequest,
@@ -83,6 +83,9 @@ export const validateLicense = (apiArgs: {
 
 export const fetchShopDetails = (shopId: string) =>
   axios.get<IShopResponse>(`${serverUrl}/shop/${shopId}`);
+
+export const fetchShopConfig = (shopId: string) =>
+  axios.get<IShopConfigResponse>(`${serverUrl}/shop/config/${shopId}`);
 
 export const fetchCustomerDetails = (apisArgs: {
   id?: string;

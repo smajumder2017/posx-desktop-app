@@ -1,19 +1,27 @@
-import OrderSummary from '../components/order-summary';
-import Menu from '../components/menu';
-import {
-  useLocation,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from 'react-router-dom';
-import { useCallback, useEffect, useState } from 'react';
 import * as apis from '@/apis';
-import { ICustomer } from '@/models/customer';
+import BillingForm, { IBillingFormPayload } from '../components/billing-form';
+import Menu from '../components/menu';
+import OrderSummary from '../components/order-summary';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { MenuEntity } from '@/models/menu';
+import { BillDisplay } from '../components/bill';
+import { Button } from '@/components/ui/button';
+import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import { formatPrice } from '@/utils/currency';
+import { IBillResponse, ICreateBillRequest } from '@/models/billing';
+import { ICustomer } from '@/models/customer';
+import { Input } from '@/components/ui/input';
 import { IOrderItemUpdateRequest, IOrderResponse } from '@/models/order';
-import { useAppSelector } from '@/hooks/redux';
 import { IPrintTicketRequest } from '@/models/printer';
+import { Label } from '@/components/ui/label';
+import { MenuEntity } from '@/models/menu';
+import { posXDB } from '@/db/db';
+import { Switch } from '@/components/ui/switch';
+import { useAppSelector } from '@/hooks/redux';
+import { useCallback, useEffect, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useQueryParams } from '@/hooks/use-query-params';
+import { useToast } from '@/components/ui/use-toast';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -40,25 +48,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import BillingForm, { IBillingFormPayload } from '../components/billing-form';
-import { posXDB } from '@/db/db';
-import { IBillResponse, ICreateBillRequest } from '@/models/billing';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
-import { formatPrice } from '@/utils/currency';
-import { useToast } from '@/components/ui/use-toast';
-import { BillDisplay } from '../components/bill';
-
-import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
-
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function CreateOrder() {
   const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const orderId = searchParams.get('orderId');
+  const [searchParams, setSearchParams] = useQueryParams();
+
+  const orderId = searchParams['orderId'];
+  const placeId = searchParams['paceId'];
   const [, setLoading] = useState(false);
   const [customer, setCustomer] = useState<ICustomer>();
   const [ticketItems, setTicketItems] = useState<{ [key: string]: number }>({});
@@ -178,7 +174,11 @@ export default function CreateOrder() {
         await getOrderDetails(orderId);
       } else {
         res = (await apis.createOrder(payload)).data;
-        setSearchParams({ orderId: res.id });
+        if (placeId) {
+          //TODO:Function to create delivery
+          createDelivery();
+        }
+        setSearchParams({ ...searchParams, orderId: res.id });
       }
       toast({
         title: 'Order placed',
@@ -198,6 +198,10 @@ export default function CreateOrder() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [menu.length, ticketLength, orderId]);
+
+  const createDelivery = () => {
+    console.log('hello');
+  };
 
   const getOrderDetails = useCallback(async (orderId: string) => {
     try {
